@@ -39,3 +39,16 @@ Prompt builder
 LLM client
 ↓
 Grounded answer with sources
+
+## Current Status
+
+Phase 1 complete:
+
+- Clean project structure created
+- Core configuration added
+- Shared Pydantic schemas added
+- Custom exceptions added
+- Markdown document loader implemented
+- Heading-aware chunker implemented
+- Sample banking knowledge documents added
+- Unit tests added for document loading and chunking
