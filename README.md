@@ -268,6 +268,32 @@ Example expected answer:
 The provided documents do not contain enough information regarding the exact refund timeline for a failed QR payment. The bank reviews transaction status, merchant confirmation, settlement records, and channel logs. If the payment failed or was not settled successfully, the case may be reversed or escalated according to the bank's dispute process [Source: 1 digital_payments.md, QR Payment Disputes].
 ```
 
+## Retrieval Evaluation
+
+This project includes a small retrieval evaluation set:
+
+```text
+evaluation/evaluation_questions.json
+```
+
+Run retrieval evaluation:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_eval.py
+```
+
+The evaluation checks whether the retriever returns the expected top source and section for each question.
+
+Expected result:
+
+```text
+Passed: 4
+Failed: 0
+Total: 4
+```
+
+This evaluates the retrieval layer separately from answer generation. That separation is important because if the retrieved chunks are weak, the LLM receives weak context and the final answer may be unsupported.
+
 ## Tests
 
 Run the test suite:
@@ -289,7 +315,7 @@ The current tests cover:
 
 ## Current Status
 
-Phase 4 complete:
+Phase 5 complete:
 
 - Clean project structure created
 - Core configuration added
@@ -309,5 +335,8 @@ Phase 4 complete:
 - Gemini LLM client added
 - RAG service added
 - Answer runner added
-- Unit tests added for loading, chunking, vector storage, indexing, retrieval, prompt building, and RAG orchestration
-- Chroma index builds successfully with 9 chunks.
+- Retrieval evaluation service added
+- Evaluation question set added
+- Evaluation runner added
+- Unit tests added for loading, chunking, vector storage, indexing, retrieval, prompt building, RAG orchestration, and evaluation
+- Chroma index builds successfully with 9 chunks

@@ -1,0 +1,26 @@
+[
+  {
+    "question": "What should happen if my QR payment was deducted but the merchant did not receive it?",
+    "expected_top_source": "digital_payments.md",
+    "expected_top_section": "QR Payment Disputes",
+    "expected_behavior": "Explain that the customer may raise a dispute and the bank reviews transaction status, merchant confirmation, settlement records, and channel logs."
+  },
+  {
+    "question": "What is the exact refund timeline for a failed QR payment?",
+    "expected_top_source": "digital_payments.md",
+    "expected_top_section": "QR Payment Disputes",
+    "expected_behavior": "Say the provided documents do not contain enough information to specify an exact refund timeline."
+  },
+  {
+    "question": "I forgot my mobile banking password. How can I get back in?",
+    "expected_top_source": "mobile_app_access.md",
+    "expected_top_section": "Password Recovery",
+    "expected_behavior": "Mention the forgot password option and registered mobile number verification."
+  },
+  {
+    "question": "My debit card payment was charged twice at the same shop.",
+    "expected_top_source": "card_disputes.md",
+    "expected_top_section": "Duplicate Card Charges",
+    "expected_behavior": "Explain that duplicate card transactions can be reported and reviewed using card transaction logs, merchant records, and settlement information."
+  }
+]
