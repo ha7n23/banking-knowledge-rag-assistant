@@ -31,3 +31,20 @@ class RetrievedChunk(BaseModel):
     chunk_index: int
     distance: float
     metadata: dict[str, MetadataValue] = Field(default_factory=dict)
+
+class SourceReference(BaseModel):
+    """A source used to support a generated answer."""
+
+    source: str
+    section: str
+    chunk_index: int
+    distance: float
+
+
+class RAGAnswer(BaseModel):
+    """Final grounded answer returned by the RAG service."""
+
+    question: str
+    answer: str
+    sources: list[SourceReference]
+    retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)

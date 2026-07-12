@@ -11,3 +11,6 @@ class ChunkingError(BankingRAGError):
 
 class RetrievalError(BankingRAGError):
     """Raised when retrieval fails."""
+
+class GenerationError(BankingRAGError):
+    """Raised when answer generation fails."""

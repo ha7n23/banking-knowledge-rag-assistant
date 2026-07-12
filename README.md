@@ -211,6 +211,20 @@ data/chroma_db/
 
 This folder is ignored by Git because it can be rebuilt from the raw documents.
 
+## Check Chroma Count
+
+After indexing, confirm that chunks were stored:
+
+```bash
+PYTHONPATH=src python -c "from banking_rag.core.config import CHROMA_DIR, COLLECTION_NAME; from banking_rag.retrieval.vector_store import ChromaVectorStore; store=ChromaVectorStore(CHROMA_DIR, COLLECTION_NAME); print('Chroma count:', store.count())"
+```
+
+Expected output:
+
+```text
+Chroma count: 9
+```
+
 ## Query the Knowledge Base
 
 After indexing, retrieve relevant chunks for a question:
@@ -225,18 +239,33 @@ Source: digital_payments.md
 Section: QR Payment Disputes
 ```
 
-## Check Chroma Count
+## Generate Grounded Answers
 
-After indexing, confirm that chunks were stored:
+After indexing, run the full RAG pipeline:
 
 ```bash
-PYTHONPATH=src python -c "from banking_rag.core.config import CHROMA_DIR, COLLECTION_NAME; from banking_rag.retrieval.vector_store import ChromaVectorStore; store=ChromaVectorStore(CHROMA_DIR, COLLECTION_NAME); print('Chroma count:', store.count())"
+PYTHONPATH=src python src/banking_rag/runners/run_answer.py --query "What is the exact refund timeline for a failed QR payment?"
 ```
 
-Expected output:
+Example supported query:
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_answer.py --query "I forgot my mobile banking password. How can I get back in?"
+```
 
+Example expected answer:
 ```text
-Chroma count: 9
+Customers who forget their mobile banking password should use the "forgot password" option in the mobile app. They may need to verify their registered mobile number before setting a new password.
+Source: [1] mobile_app_access.md, Password Recovery.
+```
+
+Example supported query:
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_answer.py --query "What is the exact refund timeline for a failed QR payment?"
+```
+
+Example expected answer:
+```text
+The provided documents do not contain enough information regarding the exact refund timeline for a failed QR payment. The bank reviews transaction status, merchant confirmation, settlement records, and channel logs. If the payment failed or was not settled successfully, the case may be reversed or escalated according to the bank's dispute process [Source: 1 digital_payments.md, QR Payment Disputes].
 ```
 
 ## Tests
@@ -260,7 +289,7 @@ The current tests cover:
 
 ## Current Status
 
-Phase 3 complete:
+Phase 4 complete:
 
 - Clean project structure created
 - Core configuration added
@@ -276,5 +305,9 @@ Phase 3 complete:
 - Retrieved chunk schema added
 - Retrieval service added
 - Query runner added
-- Unit tests added for loading, chunking, vector storage, indexing, and retrieval
-- Chroma index builds successfully with 9 chunks
+- Grounded prompt builder added
+- Gemini LLM client added
+- RAG service added
+- Answer runner added
+- Unit tests added for loading, chunking, vector storage, indexing, retrieval, prompt building, and RAG orchestration
+- Chroma index builds successfully with 9 chunks.
