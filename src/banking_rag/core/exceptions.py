@@ -8,3 +8,6 @@ class DocumentLoadingError(BankingRAGError):
 
 class ChunkingError(BankingRAGError):
     """Raised when documents cannot be chunked properly."""
+
+class RetrievalError(BankingRAGError):
+    """Raised when retrieval fails."""

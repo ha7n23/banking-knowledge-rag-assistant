@@ -211,6 +211,20 @@ data/chroma_db/
 
 This folder is ignored by Git because it can be rebuilt from the raw documents.
 
+## Query the Knowledge Base
+
+After indexing, retrieve relevant chunks for a question:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "What should happen if my QR payment was deducted but the merchant did not receive it?"
+```
+
+Example expected top result:
+```text
+Source: digital_payments.md
+Section: QR Payment Disputes
+```
+
 ## Check Chroma Count
 
 After indexing, confirm that chunks were stored:
@@ -246,7 +260,7 @@ The current tests cover:
 
 ## Current Status
 
-Phase 2 complete:
+Phase 3 complete:
 
 - Clean project structure created
 - Core configuration added
@@ -259,17 +273,8 @@ Phase 2 complete:
 - Chroma vector store wrapper added
 - Knowledge base indexer added
 - Index runner added
-- Unit tests added for loading, chunking, vector storage, and indexing
+- Retrieved chunk schema added
+- Retrieval service added
+- Query runner added
+- Unit tests added for loading, chunking, vector storage, indexing, and retrieval
 - Chroma index builds successfully with 9 chunks
-
-## Next Phase
-
-Phase 3 will add:
-
-- retrieval service
-- query runner
-- retrieved chunk schema
-- retrieval-specific error handling
-- tests for retrieval behaviour
-
-The next goal is to ask a user question, embed it, search Chroma, and return the most relevant chunks with source metadata.

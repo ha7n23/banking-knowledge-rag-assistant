@@ -21,3 +21,13 @@ class DocumentChunk(BaseModel):
     section: str
     chunk_index: int
     metadata: dict[str, MetadataValue] = Field(default_factory=dict)
+
+class RetrievedChunk(BaseModel):
+    """A chunk returned by the retriever for a user query."""
+
+    text: str
+    source: str
+    section: str
+    chunk_index: int
+    distance: float
+    metadata: dict[str, MetadataValue] = Field(default_factory=dict)
