@@ -1,5 +1,7 @@
 # Banking Knowledge RAG Assistant
 
+![CI](https://github.com/ha7n23/banking-knowledge-rag-assistant/actions/workflows/ci.yml/badge.svg)
+
 A production-style Retrieval-Augmented Generation assistant for banking and fintech knowledge documents.
 
 The assistant is designed to answer questions using retrieved document context. If the documents do not contain enough information, the assistant should say so instead of inventing unsupported details.
@@ -399,9 +401,25 @@ index into Chroma
 start FastAPI API
 ```
 
+## Continuous Integration
+
+This project uses GitHub Actions for CI.
+
+On every push to `main` and every pull request, the workflow:
+
+- installs Python dependencies
+- runs the pytest test suite
+- builds the Docker image
+
+Workflow file:
+
+```text
+.github/workflows/ci.yml
+```
+
 ## Current Status
 
-Phase 7A complete:
+Phase 7B complete:
 
 - Clean project structure created
 - Core configuration added
@@ -428,8 +446,10 @@ Phase 7A complete:
 - `/health`, `/retrieve`, and `/answer` endpoints added
 - Docker support added
 - Container builds the Chroma index at startup
+- GitHub Actions CI added
+- CI runs tests and validates Docker image build
 - Unit and API tests passing
-- Chroma index builds successfully with 9 chunks
+- Chroma index builds successfully with 9 chunks inside Docker
 
 ### Windows Note
 
