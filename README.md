@@ -294,6 +294,50 @@ Total: 4
 
 This evaluates the retrieval layer separately from answer generation. That separation is important because if the retrieved chunks are weak, the LLM receives weak context and the final answer may be unsupported.
 
+## Run the API
+
+Start the FastAPI server:
+
+```bash
+PYTHONPATH=src uvicorn banking_rag.api.app:app --reload
+```
+
+Open the interactive API docs:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Available endpoints:
+
+```text
+GET  /health
+POST /retrieve
+POST /answer
+```
+
+### Retrieve Evidence Chunks
+
+```json
+{
+  "query": "What should happen if my QR payment was deducted but the merchant did not receive it?",
+  "top_k": 3
+}
+```
+
+The `/retrieve` endpoint returns relevant chunks with source, section, chunk index, and distance.
+
+### Generate a Grounded Answer
+
+```json
+{
+  "query": "What is the exact refund timeline for a failed QR payment?",
+  "top_k": 3
+}
+```
+
+The `/answer` endpoint runs the full RAG pipeline and returns a grounded answer with source references.
+
 ## Tests
 
 Run the test suite:
@@ -315,7 +359,7 @@ The current tests cover:
 
 ## Current Status
 
-Phase 5 complete:
+Phase 6 complete:
 
 - Clean project structure created
 - Core configuration added
@@ -338,5 +382,8 @@ Phase 5 complete:
 - Retrieval evaluation service added
 - Evaluation question set added
 - Evaluation runner added
-- Unit tests added for loading, chunking, vector storage, indexing, retrieval, prompt building, RAG orchestration, and evaluation
+- FastAPI backend added
+- `/health`, `/retrieve`, and `/answer` endpoints added
+- API dependency overrides added for testability
+- Unit and API tests added
 - Chroma index builds successfully with 9 chunks
