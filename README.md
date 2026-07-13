@@ -357,9 +357,51 @@ The current tests cover:
 - Chroma querying
 - indexing from sample documents
 
+## Docker
+
+This project can run inside Docker for consistent local execution and future deployment.
+
+Build the image:
+
+```bash
+docker build -t banking-knowledge-rag-assistant .
+```
+
+Run the API without LLM answer generation:
+
+```bash
+docker run --rm -p 8000:8000 banking-knowledge-rag-assistant
+```
+
+Open the API docs:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+The container builds the Chroma knowledge base at startup before starting the FastAPI server.
+
+Run with Gemini API key support:
+
+```bash
+docker run --rm --env-file .env -p 8000:8000 banking-knowledge-rag-assistant
+```
+
+The `.env` file is passed at runtime and is not copied into the Docker image.
+
+Inside Docker, the startup flow is:
+
+```text
+raw documents
+↓
+index into Chroma
+↓
+start FastAPI API
+```
+
 ## Current Status
 
-Phase 6 complete:
+Phase 7A complete:
 
 - Clean project structure created
 - Core configuration added
@@ -384,6 +426,11 @@ Phase 6 complete:
 - Evaluation runner added
 - FastAPI backend added
 - `/health`, `/retrieve`, and `/answer` endpoints added
-- API dependency overrides added for testability
-- Unit and API tests added
+- Docker support added
+- Container builds the Chroma index at startup
+- Unit and API tests passing
 - Chroma index builds successfully with 9 chunks
+
+### Windows Note
+
+This project uses Sentence Transformers, which depends on PyTorch for local embeddings. On some managed Windows machines, Application Control policies may block PyTorch DLL files. If that happens, run the project through Docker. The Docker container provides a Linux runtime and builds the Chroma knowledge base at startup.

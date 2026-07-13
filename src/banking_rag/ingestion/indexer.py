@@ -1,3 +1,5 @@
+from typing import Protocol
+
 from banking_rag.core.config import (
     CHROMA_DIR,
     CHUNK_OVERLAP,
@@ -13,15 +15,34 @@ from banking_rag.retrieval.embedding_model import EmbeddingModel
 from banking_rag.retrieval.vector_store import ChromaVectorStore
 
 
+class TextEmbedder(Protocol):
+    """Protocol for embedding document chunks."""
+
+    def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        """Create embeddings for multiple texts."""
+        ...
+
+
 class KnowledgeBaseIndexer:
     """Builds the searchable Chroma knowledge base from raw documents."""
 
-    def __init__(self) -> None:
-        self.embedding_model = EmbeddingModel(EMBEDDING_MODEL_NAME)
-        self.vector_store = ChromaVectorStore(
+    def __init__(
+        self,
+        embedding_model: TextEmbedder | None = None,
+        vector_store: ChromaVectorStore | None = None,
+    ) -> None:
+        self.embedding_model = embedding_model
+        self.vector_store = vector_store or ChromaVectorStore(
             persist_dir=CHROMA_DIR,
             collection_name=COLLECTION_NAME,
         )
+
+    def _get_embedding_model(self) -> TextEmbedder:
+        """Create the real embedding model only when indexing is run."""
+        if self.embedding_model is None:
+            self.embedding_model = EmbeddingModel(EMBEDDING_MODEL_NAME)
+
+        return self.embedding_model
 
     def build_chunks(self) -> list[DocumentChunk]:
         """Load raw documents and convert them into chunks."""
@@ -49,7 +70,8 @@ class KnowledgeBaseIndexer:
         """
         chunks = self.build_chunks()
 
-        embeddings = self.embedding_model.embed_texts(
+        embedding_model = self._get_embedding_model()
+        embeddings = embedding_model.embed_texts(
             [chunk.text for chunk in chunks]
         )
 
