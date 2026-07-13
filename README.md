@@ -51,6 +51,13 @@ LLM Client
 Grounded Answer with Sources
 ```
 
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [API Examples](docs/API_EXAMPLES.md)
+- [Evaluation](docs/EVALUATION.md)
+- [Design Decisions](docs/DESIGN_DECISIONS.md)
+
 ## Current Project Structure
 
 ```text
@@ -419,7 +426,7 @@ Workflow file:
 
 ## Current Status
 
-Phase 7B complete:
+Phase 8A complete:
 
 - Clean project structure created
 - Core configuration added
@@ -448,6 +455,10 @@ Phase 7B complete:
 - Container builds the Chroma index at startup
 - GitHub Actions CI added
 - CI runs tests and validates Docker image build
+- Architecture documentation added
+- API examples added
+- Evaluation documentation added
+- Design decisions documented
 - Unit and API tests passing
 - Chroma index builds successfully with 9 chunks inside Docker
 
