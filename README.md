@@ -2,32 +2,43 @@
 
 ![CI](https://github.com/ha7n23/banking-knowledge-rag-assistant/actions/workflows/ci.yml/badge.svg)
 
-A production-style Retrieval-Augmented Generation assistant for banking and fintech knowledge documents.
+A production-style Retrieval-Augmented Generation application for answering banking and fintech knowledge questions using source-grounded document context.
 
-The assistant is designed to answer questions using retrieved document context. If the documents do not contain enough information, the assistant should say so instead of inventing unsupported details.
+The assistant retrieves relevant knowledge chunks from a local Chroma vector database, builds a grounded prompt, and generates an answer using Gemini. If the documents do not contain enough information, the assistant is instructed to say so rather than invent unsupported details.
 
-## Goal
+## Project Summary
 
-This project demonstrates a clean RAG application architecture using:
+This project demonstrates an end-to-end RAG system with:
 
-- document loading
+- markdown document ingestion
 - heading-aware chunking
-- local embeddings with Sentence Transformers
+- local Sentence Transformers embeddings
 - Chroma vector storage
 - semantic retrieval
-- source-grounded prompt generation
+- grounded prompt construction
 - Gemini answer generation
-- no-answer handling
+- FastAPI backend
 - retrieval evaluation
-- tests and deployment polish
+- unit and API tests
+- Docker support
+- GitHub Actions CI
+
+The project is designed with a banking/fintech use case, where answers should be cautious, traceable, and based on available source material.
 
 ## Why This Project Matters
 
-RAG systems are useful when an LLM needs access to private, updated, or domain-specific knowledge.
+Large language models do not automatically know private, updated, or organisation-specific documents. RAG solves this by retrieving relevant source material before generation.
 
-Instead of relying only on the model's training data, this project builds a searchable banking knowledge base. User questions are matched against stored document chunks, and the most relevant chunks are later used as grounded context for answer generation.
+This is especially important in banking because the assistant should not invent:
 
-This is especially important in banking and fintech because answers should be traceable, cautious, and based on source material.
+- refund timelines
+- fees
+- eligibility rules
+- transaction limits
+- guarantees
+- policy details
+
+Instead, the assistant should answer only from retrieved context and clearly say when the available documents are insufficient.
 
 ## Architecture
 
@@ -44,12 +55,16 @@ Chroma Vector Store
 ↓
 Retriever
 ↓
-Prompt Builder
+Grounded Prompt Builder
 ↓
-LLM Client
+Gemini LLM Client
 ↓
-Grounded Answer with Sources
+RAG Service
+↓
+FastAPI API
 ```
+
+The project separates ingestion, retrieval, generation, services, API routes, and evaluation into clear modules.
 
 ## Documentation
 
@@ -58,7 +73,20 @@ Grounded Answer with Sources
 - [Evaluation](docs/EVALUATION.md)
 - [Design Decisions](docs/DESIGN_DECISIONS.md)
 
-## Current Project Structure
+## Tech Stack
+
+- Python 3.11
+- FastAPI
+- Uvicorn
+- Chroma
+- Sentence Transformers
+- Google Gemini
+- Pydantic
+- Pytest
+- Docker
+- GitHub Actions
+
+## Project Structure
 
 ```text
 banking-knowledge-rag-assistant/
@@ -69,10 +97,26 @@ banking-knowledge-rag-assistant/
       mobile_app_access.md
     chroma_db/
 
+  docs/
+    ARCHITECTURE.md
+    API_EXAMPLES.md
+    EVALUATION.md
+    DESIGN_DECISIONS.md
+
   evaluation/
+    evaluation_questions.json
+
+  scripts/
+    start_api.sh
 
   src/
     banking_rag/
+      api/
+        app.py
+        dependencies.py
+        routes.py
+        schemas.py
+
       core/
         config.py
         exceptions.py
@@ -94,68 +138,121 @@ banking-knowledge-rag-assistant/
 
       services/
         rag_service.py
+        evaluation_service.py
 
       runners/
         run_index.py
         run_query.py
+        run_answer.py
         run_eval.py
 
   tests/
-  README.md
+  Dockerfile
   requirements.txt
   pytest.ini
   pyrightconfig.json
   .env.example
+  .dockerignore
   .gitignore
+  README.md
 ```
 
-## Core Components
+## Core Features
 
-### `core/`
+### Document Ingestion
 
-Contains shared project configuration, schemas, and custom exceptions.
+Markdown documents are loaded from:
 
-- `config.py` stores project paths, model names, Chroma settings, and environment variables.
-- `schemas.py` defines shared Pydantic models such as `RawDocument` and `DocumentChunk`.
-- `exceptions.py` defines custom errors for clearer debugging.
+```text
+data/raw_docs/
+```
 
-### `ingestion/`
+The project currently includes sample banking knowledge documents covering:
 
-Handles the document preparation stage.
+- digital payments
+- mobile app access
+- card disputes
 
-- `document_loader.py` loads markdown documents from `data/raw_docs/`.
-- `chunker.py` splits documents into clean, heading-aware chunks.
-- `indexer.py` builds the searchable knowledge base by loading, chunking, embedding, and storing chunks.
+### Heading-Aware Chunking
 
-### `retrieval/`
+Documents are split by section headings before being stored in Chroma.
 
-Handles embeddings and vector storage.
+This keeps chunks meaningful and easier to cite, for example:
 
-- `embedding_model.py` wraps a local Sentence Transformers model.
-- `vector_store.py` wraps Chroma operations for adding, querying, and counting chunks.
-- `retriever.py` will handle user-question retrieval in the next phase.
+```text
+digital_payments.md / QR Payment Disputes
+```
 
-### `generation/`
+### Local Embeddings
 
-Reserved for grounded prompt building and LLM answer generation.
+The project uses Sentence Transformers for local embeddings.
 
-### `services/`
+The embedding model is lazy-loaded so tests can import the codebase without immediately loading PyTorch or Sentence Transformers.
 
-Reserved for orchestration logic that combines retrieval and generation.
+### Chroma Vector Store
 
-### `runners/`
+Chroma stores:
 
-Contains command-line entry points for indexing, querying, and evaluation.
+- chunk text
+- embeddings
+- source metadata
+- section metadata
+- chunk index
 
-## Tech Stack
+The generated Chroma database is ignored by Git because it can be rebuilt from raw documents.
 
-- Python
-- Chroma
-- Sentence Transformers
-- Google Gemini
-- Python-dotenv
-- Pydantic
-- Pytest
+### Retrieval
+
+The retriever embeds a user question and searches Chroma for the most relevant chunks.
+
+The `/retrieve` endpoint exposes retrieved evidence directly, which is useful for debugging retrieval quality.
+
+### Grounded Answer Generation
+
+The RAG service combines:
+
+```text
+question
+↓
+retrieved chunks
+↓
+grounded prompt
+↓
+Gemini answer
+↓
+answer with source references
+```
+
+The prompt instructs the model to use only provided context and avoid unsupported claims.
+
+### FastAPI Backend
+
+The API exposes:
+
+```text
+GET  /health
+POST /retrieve
+POST /answer
+```
+
+### Evaluation
+
+The retrieval evaluation checks whether the expected source and section are returned as the top retrieval result for each evaluation question.
+
+### Docker
+
+Docker provides a consistent runtime. The container builds the Chroma knowledge base at startup before starting the FastAPI server.
+
+### CI
+
+GitHub Actions runs:
+
+```text
+pytest
+docker build
+```
+
+on every push to `main` and every pull request.
 
 ## Setup
 
@@ -175,27 +272,13 @@ pip install -r requirements.txt
 Create a local `.env` file:
 
 ```env
+APP_NAME=Banking Knowledge RAG Assistant
+ENVIRONMENT=development
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
 The `.env` file is ignored by Git and should not be committed.
-
-## Raw Documents
-
-Sample banking knowledge documents are stored in:
-
-```text
-data/raw_docs/
-```
-
-Current sample documents:
-
-- `digital_payments.md`
-- `mobile_app_access.md`
-- `card_disputes.md`
-
-These documents are intentionally small and controlled so the RAG pipeline can be tested clearly before expanding to larger or messier documents.
 
 ## Build the Knowledge Base
 
@@ -212,17 +295,7 @@ Building banking knowledge base...
 Indexed 9 chunks into Chroma.
 ```
 
-The generated Chroma database is stored locally in:
-
-```text
-data/chroma_db/
-```
-
-This folder is ignored by Git because it can be rebuilt from the raw documents.
-
-## Check Chroma Count
-
-After indexing, confirm that chunks were stored:
+Check Chroma count:
 
 ```bash
 PYTHONPATH=src python -c "from banking_rag.core.config import CHROMA_DIR, COLLECTION_NAME; from banking_rag.retrieval.vector_store import ChromaVectorStore; store=ChromaVectorStore(CHROMA_DIR, COLLECTION_NAME); print('Chroma count:', store.count())"
@@ -236,72 +309,33 @@ Chroma count: 9
 
 ## Query the Knowledge Base
 
-After indexing, retrieve relevant chunks for a question:
+Retrieve relevant chunks without generating an LLM answer:
 
 ```bash
 PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "What should happen if my QR payment was deducted but the merchant did not receive it?"
 ```
 
-Example expected top result:
+Expected top result:
+
 ```text
-Source: digital_payments.md
-Section: QR Payment Disputes
+digital_payments.md / QR Payment Disputes
 ```
 
-## Generate Grounded Answers
+## Generate a Grounded Answer
 
-After indexing, run the full RAG pipeline:
+Run the full RAG pipeline:
 
 ```bash
 PYTHONPATH=src python src/banking_rag/runners/run_answer.py --query "What is the exact refund timeline for a failed QR payment?"
 ```
 
-Example supported query:
-```bash
-PYTHONPATH=src python src/banking_rag/runners/run_answer.py --query "I forgot my mobile banking password. How can I get back in?"
-```
-
-Example expected answer:
-```text
-Customers who forget their mobile banking password should use the "forgot password" option in the mobile app. They may need to verify their registered mobile number before setting a new password.
-Source: [1] mobile_app_access.md, Password Recovery.
-```
-
-Example supported query:
-```bash
-PYTHONPATH=src python src/banking_rag/runners/run_answer.py --query "What is the exact refund timeline for a failed QR payment?"
-```
-
-Example expected answer:
-```text
-The provided documents do not contain enough information regarding the exact refund timeline for a failed QR payment. The bank reviews transaction status, merchant confirmation, settlement records, and channel logs. If the payment failed or was not settled successfully, the case may be reversed or escalated according to the bank's dispute process [Source: 1 digital_payments.md, QR Payment Disputes].
-```
-
-## Retrieval Evaluation
-
-This project includes a small retrieval evaluation set:
+Expected behaviour:
 
 ```text
-evaluation/evaluation_questions.json
+The provided documents do not contain enough information regarding the exact refund timeline...
 ```
 
-Run retrieval evaluation:
-
-```bash
-PYTHONPATH=src python src/banking_rag/runners/run_eval.py
-```
-
-The evaluation checks whether the retriever returns the expected top source and section for each question.
-
-Expected result:
-
-```text
-Passed: 4
-Failed: 0
-Total: 4
-```
-
-This evaluates the retrieval layer separately from answer generation. That separation is important because if the retrieved chunks are weak, the LLM receives weak context and the final answer may be unsupported.
+The assistant should not invent a refund timeline unless the retrieved documents contain one.
 
 ## Run the API
 
@@ -327,6 +361,8 @@ POST /answer
 
 ### Retrieve Evidence Chunks
 
+Example request body for `/retrieve`:
+
 ```json
 {
   "query": "What should happen if my QR payment was deducted but the merchant did not receive it?",
@@ -334,9 +370,9 @@ POST /answer
 }
 ```
 
-The `/retrieve` endpoint returns relevant chunks with source, section, chunk index, and distance.
-
 ### Generate a Grounded Answer
+
+Example request body for `/answer`:
 
 ```json
 {
@@ -345,30 +381,47 @@ The `/retrieve` endpoint returns relevant chunks with source, section, chunk ind
 }
 ```
 
-The `/answer` endpoint runs the full RAG pipeline and returns a grounded answer with source references.
+## Run Evaluation
 
-## Tests
+Run retrieval evaluation:
 
-Run the test suite:
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_eval.py
+```
+
+Expected result:
+
+```text
+Passed: 4
+Failed: 0
+Total: 4
+```
+
+The evaluation checks whether retrieval returns the expected top source and section.
+
+## Run Tests
+
+Run the full test suite:
 
 ```bash
 pytest
 ```
 
-The current tests cover:
+The tests cover:
 
-- markdown document loading
-- empty document handling
-- missing document directory handling
-- heading-aware chunking
-- source and section metadata preservation
-- Chroma vector storage
-- Chroma querying
-- indexing from sample documents
+- document loading
+- chunking
+- vector storage
+- indexing
+- retrieval
+- prompt building
+- RAG service orchestration
+- evaluation service
+- FastAPI endpoints
+
+Tests use fake retrievers and fake LLM clients where appropriate, so the test suite does not require live LLM calls.
 
 ## Docker
-
-This project can run inside Docker for consistent local execution and future deployment.
 
 Build the image:
 
@@ -376,19 +429,13 @@ Build the image:
 docker build -t banking-knowledge-rag-assistant .
 ```
 
-Run the API without LLM answer generation:
+Run the API without passing environment variables:
 
 ```bash
 docker run --rm -p 8000:8000 banking-knowledge-rag-assistant
 ```
 
-Open the API docs:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-The container builds the Chroma knowledge base at startup before starting the FastAPI server.
+This supports `/health` and `/retrieve`.
 
 Run with Gemini API key support:
 
@@ -396,25 +443,33 @@ Run with Gemini API key support:
 docker run --rm --env-file .env -p 8000:8000 banking-knowledge-rag-assistant
 ```
 
-The `.env` file is passed at runtime and is not copied into the Docker image.
-
-Inside Docker, the startup flow is:
+The container startup flow is:
 
 ```text
-raw documents
+build Chroma knowledge base
 ↓
-index into Chroma
-↓
-start FastAPI API
+start FastAPI server
 ```
+
+Open:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## Windows Note
+
+This project uses Sentence Transformers, which depends on PyTorch for local embeddings.
+
+On some managed Windows machines, Application Control policies may block PyTorch DLL files. If that happens, run the project through Docker. The Docker container provides a Linux runtime and builds the Chroma knowledge base at startup.
 
 ## Continuous Integration
 
-This project uses GitHub Actions for CI.
+This project uses GitHub Actions.
 
-On every push to `main` and every pull request, the workflow:
+On every push to `main` and every pull request, CI:
 
-- installs Python dependencies
+- installs dependencies
 - runs the pytest test suite
 - builds the Docker image
 
@@ -424,44 +479,67 @@ Workflow file:
 .github/workflows/ci.yml
 ```
 
+## Example Questions
+
+Supported question:
+
+```text
+I forgot my mobile banking password. How can I get back in?
+```
+
+Expected behaviour:
+
+```text
+The assistant should mention the forgot password option and registered mobile number verification.
+```
+
+Unsupported detail question:
+
+```text
+What is the exact refund timeline for a failed QR payment?
+```
+
+Expected behaviour:
+
+```text
+The assistant should say the documents do not contain enough information to specify the exact refund timeline.
+```
+
 ## Current Status
 
-Phase 8A complete:
+Phase 8B complete:
 
-- Clean project structure created
-- Core configuration added
-- Shared Pydantic schemas added
-- Custom exceptions added
-- Markdown document loader implemented
-- Heading-aware chunker implemented
-- Sample banking knowledge documents added
-- Local Sentence Transformers embedding wrapper added
-- Chroma vector store wrapper added
-- Knowledge base indexer added
-- Index runner added
-- Retrieved chunk schema added
-- Retrieval service added
-- Query runner added
+- RAG pipeline implemented end-to-end
+- Markdown document ingestion added
+- Heading-aware chunking added
+- Local Sentence Transformers embeddings added
+- Chroma vector storage added
+- Semantic retriever added
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
-- Answer runner added
-- Retrieval evaluation service added
-- Evaluation question set added
-- Evaluation runner added
+- Retrieval evaluation added
 - FastAPI backend added
-- `/health`, `/retrieve`, and `/answer` endpoints added
 - Docker support added
-- Container builds the Chroma index at startup
 - GitHub Actions CI added
-- CI runs tests and validates Docker image build
 - Architecture documentation added
 - API examples added
 - Evaluation documentation added
 - Design decisions documented
 - Unit and API tests passing
+- Docker image builds successfully in CI
 - Chroma index builds successfully with 9 chunks inside Docker
 
-### Windows Note
+## Future Improvements
 
-This project uses Sentence Transformers, which depends on PyTorch for local embeddings. On some managed Windows machines, Application Control policies may block PyTorch DLL files. If that happens, run the project through Docker. The Docker container provides a Linux runtime and builds the Chroma knowledge base at startup.
+Potential next improvements:
+
+- add PDF ingestion
+- add hybrid search
+- add reranking
+- add answer-level evaluation
+- add streaming answers
+- add authentication for API endpoints
+- add cloud deployment
+- add more realistic banking documents
+- add provider switching for multiple LLMs
