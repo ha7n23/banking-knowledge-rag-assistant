@@ -35,6 +35,13 @@ class RetrievedChunk(BaseModel):
     distance: float
     metadata: dict[str, MetadataValue] = Field(default_factory=dict)
 
+class HybridRetrievedChunk(RetrievedChunk):
+    """Retrieved chunk with hybrid retrieval scoring information."""
+
+    semantic_rank: int | None = None
+    keyword_score: float = 0.0
+    hybrid_score: float = 0.0
+
 class SourceReference(BaseModel):
     """A source used to support a generated answer."""
 

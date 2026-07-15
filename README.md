@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 3 complete:
+Advanced RAG Phase 4 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -518,6 +518,8 @@ Advanced RAG Phase 3 complete:
 - Semantic retrieval added
 - Metadata-filtered retrieval added
 - Conservative automatic metadata filter inference added
+- Simple keyword scoring added
+- Hybrid semantic + keyword retrieval added
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
@@ -576,3 +578,27 @@ QR/merchant did not receive/payment deducted → product: digital_payments
 ```
 
 The router is intentionally conservative. If the query is unclear, no filter is applied and retrieval searches all chunks.
+
+## Hybrid Retrieval
+
+The query runner supports semantic and hybrid retrieval modes.
+
+Semantic mode:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "What does RAAST-P2M-042 mean?" --retrieval-mode semantic
+```
+
+Hybrid Mode:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "What does RAAST-P2M-042 mean?" --retrieval-mode hybrid
+```
+
+Hybrid Retrieval combines:
+
+```text
+semantic rank + keyword score
+```
+
+This is useful for exact identifiers such as policy codes, error codes, product codes, and transaction references.

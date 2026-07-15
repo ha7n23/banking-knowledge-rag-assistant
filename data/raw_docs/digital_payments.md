@@ -2,7 +2,7 @@
 
 ## QR Payment Disputes
 
-Customers may raise a dispute if a QR payment is deducted from their account but the merchant does not receive the funds. The bank reviews transaction status, merchant confirmation, settlement records, and channel logs. If the payment failed or was not settled successfully, the case may be reversed or escalated according to the bank's dispute process.
+Customers may raise a dispute if a QR payment is deducted from their account but the merchant does not receive the funds. The bank reviews transaction status, merchant confirmation, settlement records, and channel logs. If the payment failed or was not settled successfully, the case may be reversed or escalated according to the bank's dispute process. The internal sample reference code `RAAST-P2M-042` refers to QR payments where the customer account was debited but the merchant did not receive confirmation.
 
 ## Digital Payment Availability
 

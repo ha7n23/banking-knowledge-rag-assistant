@@ -7,6 +7,8 @@ from banking_rag.core.schemas import MetadataValue
 
 from banking_rag.retrieval.filter_router import infer_metadata_filter
 
+from banking_rag.retrieval.hybrid_retriever import HybridRetriever
+
 DEFAULT_QUERY = (
     "What should happen if my QR payment was deducted "
     "but the merchant did not receive it?"
@@ -67,6 +69,13 @@ def parse_args() -> ArgumentParser:
         help="Automatically infer a metadata filter from the query.",
     )
 
+    parser.add_argument(
+        "--retrieval-mode",
+        choices=["semantic", "hybrid"],
+        default="semantic",
+        help="Retrieval mode to use.",
+    )
+
     return parser
 
 def build_metadata_filter(args: object) -> dict[str, MetadataValue] | None:
@@ -103,7 +112,11 @@ def main() -> None:
     if metadata_filter is None and args.auto_filter:
         metadata_filter = infer_metadata_filter(args.query)
 
-    retriever = KnowledgeRetriever()
+    if args.retrieval_mode == "hybrid":
+        retriever = HybridRetriever()
+    else:
+        retriever = KnowledgeRetriever()
+
     retrieved_chunks = retriever.retrieve(
         query=args.query,
         top_k=args.top_k,
@@ -124,6 +137,20 @@ def main() -> None:
         print(f"Section: {chunk.section}")
         print(f"Chunk index: {chunk.chunk_index}")
         print(f"Distance: {chunk.distance:.4f}")
+
+        semantic_rank = getattr(chunk, "semantic_rank", None)
+        keyword_score = getattr(chunk, "keyword_score", None)
+        hybrid_score = getattr(chunk, "hybrid_score", None)
+
+        if semantic_rank is not None:
+            print(f"Semantic rank: {semantic_rank}")
+
+        if keyword_score is not None:
+            print(f"Keyword score: {keyword_score:.4f}")
+
+        if hybrid_score is not None:
+            print(f"Hybrid score: {hybrid_score:.4f}")
+
         print("\nChunk text:")
         print(chunk.text)
 

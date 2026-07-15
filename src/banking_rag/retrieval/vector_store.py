@@ -74,3 +74,17 @@ class ChromaVectorStore:
     def count(self) -> int:
         """Return the number of records in the collection."""
         return self.collection.count()
+    
+    def get_all(
+        self,
+        metadata_filter: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Return all stored chunks, optionally restricted by metadata."""
+        get_kwargs: dict[str, Any] = {
+            "include": ["documents", "metadatas"],
+        }
+
+        if metadata_filter:
+            get_kwargs["where"] = metadata_filter
+
+        return cast(dict[str, Any], self.collection.get(**get_kwargs))

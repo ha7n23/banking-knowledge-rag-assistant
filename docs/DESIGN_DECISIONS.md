@@ -156,3 +156,19 @@ It only applies a filter when the query clearly points to a product area such as
 If the query is unclear, no metadata filter is applied.
 
 This avoids over-filtering, which can cause the retriever to miss the correct answer.
+
+## Hybrid Retrieval
+
+The project includes a simple hybrid retriever that combines semantic retrieval with keyword scoring.
+
+Semantic retrieval is useful for meaning-based queries.
+
+Keyword scoring is useful for exact identifiers such as:
+
+- policy codes
+- error codes
+- transaction reference patterns
+- product names
+- acronyms
+
+The hybrid score combines semantic rank and keyword score so that exact matches can influence the final retrieval ranking.
