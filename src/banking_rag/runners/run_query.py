@@ -9,6 +9,8 @@ from banking_rag.retrieval.filter_router import infer_metadata_filter
 
 from banking_rag.retrieval.hybrid_retriever import HybridRetriever
 
+from banking_rag.retrieval.reranker import SimpleReranker
+
 DEFAULT_QUERY = (
     "What should happen if my QR payment was deducted "
     "but the merchant did not receive it?"
@@ -76,6 +78,19 @@ def parse_args() -> ArgumentParser:
         help="Retrieval mode to use.",
     )
 
+    parser.add_argument(
+        "--rerank",
+        action="store_true",
+        help="Rerank retrieved candidate chunks before printing final results.",
+    )
+
+    parser.add_argument(
+        "--candidate-k",
+        type=int,
+        default=8,
+        help="Number of candidate chunks to retrieve before reranking.",
+    )
+
     return parser
 
 def build_metadata_filter(args: object) -> dict[str, MetadataValue] | None:
@@ -117,11 +132,24 @@ def main() -> None:
     else:
         retriever = KnowledgeRetriever()
 
+    retrieval_top_k = args.top_k
+
+    if args.rerank:
+        retrieval_top_k = max(args.top_k, args.candidate_k)
+
     retrieved_chunks = retriever.retrieve(
         query=args.query,
-        top_k=args.top_k,
+        top_k=retrieval_top_k,
         metadata_filter=metadata_filter,
     )
+
+    if args.rerank:
+        reranker = SimpleReranker()
+        retrieved_chunks = reranker.rerank(
+            query=args.query,
+            chunks=retrieved_chunks,
+            top_k=args.top_k,
+        )
 
     print("\n" + "=" * 80)
     print(f"QUERY: {args.query}")
@@ -150,6 +178,23 @@ def main() -> None:
 
         if hybrid_score is not None:
             print(f"Hybrid score: {hybrid_score:.4f}")
+
+        original_rank = getattr(chunk, "original_rank", None)
+        rerank_keyword_score = getattr(chunk, "rerank_keyword_score", None)
+        rerank_section_score = getattr(chunk, "rerank_section_score", None)
+        rerank_score = getattr(chunk, "rerank_score", None)
+
+        if original_rank is not None:
+            print(f"Original rank: {original_rank}")
+
+        if rerank_keyword_score is not None:
+            print(f"Rerank keyword score: {rerank_keyword_score:.4f}")
+
+        if rerank_section_score is not None:
+            print(f"Rerank section score: {rerank_section_score:.4f}")
+
+        if rerank_score is not None:
+            print(f"Rerank score: {rerank_score:.4f}")
 
         print("\nChunk text:")
         print(chunk.text)

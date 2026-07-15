@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 4 complete:
+Advanced RAG Phase 5 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -520,6 +520,7 @@ Advanced RAG Phase 4 complete:
 - Conservative automatic metadata filter inference added
 - Simple keyword scoring added
 - Hybrid semantic + keyword retrieval added
+- Lightweight reranking added
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
@@ -602,3 +603,23 @@ semantic rank + keyword score
 ```
 
 This is useful for exact identifiers such as policy codes, error codes, product codes, and transaction references.
+
+## Reranking
+
+The query runner supports an optional reranking step.
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "What does RAAST-P2M-042 mean?" --retrieval-mode hybrid --auto-filter --rerank --candidate-k 6
+```
+
+The reranker works after candidate retrieval:
+
+```text
+retrieve candidate chunks
+↓
+score candidates again using semantic rank, keyword overlap, and section overlap
+↓
+return the best final chunks
+```
+
+This demonstrates a common advanced RAG pattern where retrieval is split into candidate retrieval and final ranking.

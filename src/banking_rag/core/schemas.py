@@ -42,6 +42,14 @@ class HybridRetrievedChunk(RetrievedChunk):
     keyword_score: float = 0.0
     hybrid_score: float = 0.0
 
+class RerankedChunk(HybridRetrievedChunk):
+    """Retrieved chunk with reranking information."""
+
+    original_rank: int
+    rerank_keyword_score: float = 0.0
+    rerank_section_score: float = 0.0
+    rerank_score: float = 0.0
+
 class SourceReference(BaseModel):
     """A source used to support a generated answer."""
 

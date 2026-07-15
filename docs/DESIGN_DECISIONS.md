@@ -172,3 +172,17 @@ Keyword scoring is useful for exact identifiers such as:
 - acronyms
 
 The hybrid score combines semantic rank and keyword score so that exact matches can influence the final retrieval ranking.
+
+## Reranking
+
+The project includes a lightweight reranking stage after candidate retrieval.
+
+The reranker combines:
+
+- original retrieval rank
+- keyword overlap with the chunk text
+- keyword overlap with the source and section metadata
+
+This demonstrates the two-stage retrieval pattern used in many production RAG systems.
+
+In production, this layer could be replaced with a neural cross-encoder reranker or a managed reranking API.
