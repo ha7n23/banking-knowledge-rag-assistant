@@ -40,19 +40,27 @@ def main() -> None:
         print(f"Question: {result.question}")
         print(f"Expected source: {result.expected_top_source}")
         print(f"Expected section: {result.expected_top_section}")
-        print(f"Retrieved source: {result.retrieved_top_source}")
-        print(f"Retrieved section: {result.retrieved_top_section}")
-        print(f"Distance: {result.retrieved_distance:.4f}")
+        print(f"Retrieved top source: {result.retrieved_top_source}")
+        print(f"Retrieved top section: {result.retrieved_top_section}")
+        print(f"Top distance: {result.retrieved_distance:.4f}")
+        print(f"Expected rank in top-k: {result.expected_rank}")
+        print(f"Top-1 passed: {result.top_1_passed}")
+        print(f"Top-k passed: {result.top_k_passed}")
+        print(f"Expected answer type: {result.expected_answer_type}")
         print(f"Expected behavior: {result.expected_behavior}")
+
+        if result.must_not_include:
+            print(f"Must not include: {', '.join(result.must_not_include)}")
 
     print("\n" + "=" * 80)
     print("SUMMARY")
     print("=" * 80)
-    print(f"Passed: {summary.passed}")
-    print(f"Failed: {summary.failed}")
+    print(f"Top-1 passed: {summary.top_1_passed}")
+    print(f"Top-k passed: {summary.top_k_passed}")
+    print(f"Failed top-k: {summary.failed_top_k}")
     print(f"Total: {summary.total}")
 
-    if summary.failed > 0:
+    if summary.failed_top_k > 0:
         raise SystemExit(1)
 
 

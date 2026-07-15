@@ -1,7 +1,10 @@
+from typing import Literal
 from pydantic import BaseModel, Field
 
 
 MetadataValue = str | int | float | bool
+
+ExpectedAnswerType = Literal["direct_answer", "no_answer"]
 
 
 class RawDocument(BaseModel):
@@ -56,6 +59,8 @@ class EvaluationQuestion(BaseModel):
     expected_top_source: str
     expected_top_section: str
     expected_behavior: str
+    expected_answer_type: ExpectedAnswerType = "direct_answer"
+    must_not_include: list[str] = Field(default_factory=list)
 
 
 class RetrievalEvaluationResult(BaseModel):
@@ -68,6 +73,11 @@ class RetrievalEvaluationResult(BaseModel):
     retrieved_top_section: str
     retrieved_distance: float
     expected_behavior: str
+    expected_answer_type: ExpectedAnswerType
+    must_not_include: list[str]
+    expected_rank: int | None
+    top_1_passed: bool
+    top_k_passed: bool
     passed: bool
 
 
@@ -75,6 +85,7 @@ class EvaluationSummary(BaseModel):
     """Summary of retrieval evaluation results."""
 
     total: int
-    passed: int
-    failed: int
+    top_1_passed: int
+    top_k_passed: int
+    failed_top_k: int
     results: list[RetrievalEvaluationResult]

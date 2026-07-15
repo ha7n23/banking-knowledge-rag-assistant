@@ -3,24 +3,32 @@
     "question": "What should happen if my QR payment was deducted but the merchant did not receive it?",
     "expected_top_source": "digital_payments.md",
     "expected_top_section": "QR Payment Disputes",
-    "expected_behavior": "Explain that the customer may raise a dispute and the bank reviews transaction status, merchant confirmation, settlement records, and channel logs."
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Explain that the customer may raise a dispute and the bank reviews transaction status, merchant confirmation, settlement records, and channel logs.",
+    "must_not_include": []
   },
   {
     "question": "What is the exact refund timeline for a failed QR payment?",
     "expected_top_source": "digital_payments.md",
     "expected_top_section": "QR Payment Disputes",
-    "expected_behavior": "Say the provided documents do not contain enough information to specify an exact refund timeline."
+    "expected_answer_type": "no_answer",
+    "expected_behavior": "Say the provided documents do not contain enough information to specify an exact refund timeline.",
+    "must_not_include": ["24 hours", "3 days", "7 days", "working days", "within 48 hours"]
   },
   {
     "question": "I forgot my mobile banking password. How can I get back in?",
     "expected_top_source": "mobile_app_access.md",
     "expected_top_section": "Password Recovery",
-    "expected_behavior": "Mention the forgot password option and registered mobile number verification."
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Mention the forgot password option and registered mobile number verification.",
+    "must_not_include": []
   },
   {
     "question": "My debit card payment was charged twice at the same shop.",
     "expected_top_source": "card_disputes.md",
     "expected_top_section": "Duplicate Card Charges",
-    "expected_behavior": "Explain that duplicate card transactions can be reported and reviewed using card transaction logs, merchant records, and settlement information."
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Explain that duplicate card transactions can be reported and reviewed using card transaction logs, merchant records, and settlement information.",
+    "must_not_include": []
   }
 ]

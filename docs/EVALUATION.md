@@ -101,3 +101,19 @@ Possible future evaluation improvements:
 - add more documents and more evaluation questions
 - save evaluation results as JSON or markdown reports
 - add retrieval precision and recall metrics
+
+## Advanced Retrieval Metrics
+
+The evaluation now tracks both top-1 and top-k success.
+
+Top-1 success means the expected source and section were the first retrieved result.
+
+Top-k success means the expected source and section appeared anywhere in the retrieved context.
+
+This distinction matters because a RAG answer may still work if the right evidence is in the retrieved context, but weaker ranking can add noise and reduce answer quality.
+
+The evaluation set also includes:
+
+- expected answer type
+- expected answer behaviour
+- phrases that must not appear in unsupported answers

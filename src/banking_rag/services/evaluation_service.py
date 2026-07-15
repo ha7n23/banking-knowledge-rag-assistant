@@ -12,7 +12,7 @@ from banking_rag.retrieval.retriever import KnowledgeRetriever
 
 
 class RetrievalEvaluationService:
-    """Evaluates whether retrieval returns expected top chunks."""
+    """Evaluates whether retrieval returns expected chunks."""
 
     def __init__(
         self,
@@ -40,22 +40,15 @@ class RetrievalEvaluationService:
             top_k=top_k,
         )
 
-        if not retrieved_chunks:
-            top_chunk = RetrievedChunk(
-                text="",
-                source="",
-                section="",
-                chunk_index=0,
-                distance=float("inf"),
-                metadata={},
-            )
-        else:
-            top_chunk = retrieved_chunks[0]
-
-        passed = (
-            top_chunk.source == evaluation_question.expected_top_source
-            and top_chunk.section == evaluation_question.expected_top_section
+        top_chunk = self._get_top_chunk(retrieved_chunks)
+        expected_rank = self._find_expected_rank(
+            retrieved_chunks=retrieved_chunks,
+            expected_source=evaluation_question.expected_top_source,
+            expected_section=evaluation_question.expected_top_section,
         )
+
+        top_1_passed = expected_rank == 1
+        top_k_passed = expected_rank is not None
 
         return RetrievalEvaluationResult(
             question=evaluation_question.question,
@@ -65,12 +58,18 @@ class RetrievalEvaluationService:
             retrieved_top_section=top_chunk.section,
             retrieved_distance=top_chunk.distance,
             expected_behavior=evaluation_question.expected_behavior,
-            passed=passed,
+            expected_answer_type=evaluation_question.expected_answer_type,
+            must_not_include=evaluation_question.must_not_include,
+            expected_rank=expected_rank,
+            top_1_passed=top_1_passed,
+            top_k_passed=top_k_passed,
+            passed=top_k_passed,
         )
 
     def run(self, top_k: int = TOP_K) -> EvaluationSummary:
         """Run retrieval evaluation for all questions."""
         questions = self.load_questions()
+
         results = [
             self.evaluate_question(
                 evaluation_question=question,
@@ -79,12 +78,48 @@ class RetrievalEvaluationService:
             for question in questions
         ]
 
-        passed = sum(1 for result in results if result.passed)
-        failed = len(results) - passed
+        top_1_passed = sum(1 for result in results if result.top_1_passed)
+        top_k_passed = sum(1 for result in results if result.top_k_passed)
+        failed_top_k = len(results) - top_k_passed
 
         return EvaluationSummary(
             total=len(results),
-            passed=passed,
-            failed=failed,
+            top_1_passed=top_1_passed,
+            top_k_passed=top_k_passed,
+            failed_top_k=failed_top_k,
             results=results,
         )
+
+    def _get_top_chunk(
+        self,
+        retrieved_chunks: list[RetrievedChunk],
+    ) -> RetrievedChunk:
+        """Return the top retrieved chunk or an empty placeholder."""
+        if retrieved_chunks:
+            return retrieved_chunks[0]
+
+        return RetrievedChunk(
+            text="",
+            source="",
+            section="",
+            chunk_index=0,
+            distance=float("inf"),
+            metadata={},
+        )
+
+    def _find_expected_rank(
+        self,
+        retrieved_chunks: list[RetrievedChunk],
+        expected_source: str,
+        expected_section: str,
+    ) -> int | None:
+        """Find the rank of the expected source and section in retrieved chunks."""
+        for rank, chunk in enumerate(retrieved_chunks, start=1):
+            if (
+                chunk.source == expected_source
+                and chunk.section == expected_section
+            ):
+                return rank
+
+        return None 
+    

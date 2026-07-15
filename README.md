@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Phase 8B complete:
+Advanced RAG Phase 1 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -518,17 +518,14 @@ Phase 8B complete:
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
-- Retrieval evaluation added
+- Improved retrieval evaluation added
+- Top-1 and top-k retrieval evaluation supported
+- No-answer metadata and unsafe phrase checks prepared
 - FastAPI backend added
 - Docker support added
 - GitHub Actions CI added
-- Architecture documentation added
-- API examples added
-- Evaluation documentation added
-- Design decisions documented
+- Documentation added
 - Unit and API tests passing
-- Docker image builds successfully in CI
-- Chroma index builds successfully with 9 chunks inside Docker
 
 ## Future Improvements
 
