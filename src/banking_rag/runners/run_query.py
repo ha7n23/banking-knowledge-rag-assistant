@@ -5,6 +5,7 @@ from banking_rag.retrieval.retriever import KnowledgeRetriever
 
 from banking_rag.core.schemas import MetadataValue
 
+from banking_rag.retrieval.filter_router import infer_metadata_filter
 
 DEFAULT_QUERY = (
     "What should happen if my QR payment was deducted "
@@ -60,6 +61,12 @@ def parse_args() -> ArgumentParser:
         help="Optional document type filter, for example policy.",
     )
 
+    parser.add_argument(
+        "--auto-filter",
+        action="store_true",
+        help="Automatically infer a metadata filter from the query.",
+    )
+
     return parser
 
 def build_metadata_filter(args: object) -> dict[str, MetadataValue] | None:
@@ -92,6 +99,9 @@ def main() -> None:
     args = parser.parse_args()
 
     metadata_filter = build_metadata_filter(args)
+
+    if metadata_filter is None and args.auto_filter:
+        metadata_filter = infer_metadata_filter(args.query)
 
     retriever = KnowledgeRetriever()
     retrieved_chunks = retriever.retrieve(

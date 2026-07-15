@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 2 complete:
+Advanced RAG Phase 3 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -517,6 +517,7 @@ Advanced RAG Phase 2 complete:
 - Chroma vector storage with metadata added
 - Semantic retrieval added
 - Metadata-filtered retrieval added
+- Conservative automatic metadata filter inference added
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
@@ -557,3 +558,21 @@ product: digital_payments, mobile_app, cards
 channel: qr, mobile_app, card
 document_type: policy
 ```
+
+## Automatic Metadata Filtering
+
+The query runner can infer simple metadata filters from clear user queries:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "I forgot my mobile banking password" --auto-filter
+```
+
+Example inferred filters:
+
+```text
+password/login/mobile app → product: mobile_app
+card/charged twice/lost card → product: cards
+QR/merchant did not receive/payment deducted → product: digital_payments
+```
+
+The router is intentionally conservative. If the query is unclear, no filter is applied and retrieval searches all chunks.

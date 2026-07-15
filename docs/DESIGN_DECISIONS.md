@@ -146,3 +146,13 @@ This allows retrieval to be restricted to a relevant subset of the knowledge bas
 For example, card-related questions can be filtered to card documents, while mobile app access questions can be filtered to mobile app documents.
 
 Metadata filtering is useful in banking because policies and procedures often differ by product, channel, region, customer type, and document authority.
+
+## Conservative Automatic Metadata Filtering
+
+The project includes a small deterministic metadata filter router.
+
+It only applies a filter when the query clearly points to a product area such as mobile app access, cards, or digital payments.
+
+If the query is unclear, no metadata filter is applied.
+
+This avoids over-filtering, which can cause the retriever to miss the correct answer.
