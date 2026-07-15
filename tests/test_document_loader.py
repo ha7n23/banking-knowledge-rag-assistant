@@ -41,3 +41,21 @@ def test_load_markdown_documents_raises_for_missing_directory(tmp_path: Path) ->
 
     with pytest.raises(DocumentLoadingError):
         load_markdown_documents(missing_dir)
+
+def test_load_markdown_documents_adds_inferred_metadata(tmp_path: Path) -> None:
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+
+    (docs_dir / "digital_payments.md").write_text(
+        "# Digital Payments\n\n## QR Payment Disputes\n\nSome content.",
+        encoding="utf-8",
+    )
+
+    documents = load_markdown_documents(docs_dir)
+
+    assert len(documents) == 1
+    assert documents[0].metadata["file_name"] == "digital_payments.md"
+    assert documents[0].metadata["file_type"] == "markdown"
+    assert documents[0].metadata["document_type"] == "policy"
+    assert documents[0].metadata["product"] == "digital_payments"
+    assert documents[0].metadata["channel"] == "qr"

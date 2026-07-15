@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import chromadb
 
@@ -55,15 +55,21 @@ class ChromaVectorStore:
 
     def query(
         self,
-        query_embedding: Any,
+        query_embedding: list[float],
         top_k: int,
-    ) -> Any:
+        metadata_filter: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Retrieve the nearest chunks for a query embedding."""
-        return self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            include=["documents", "metadatas", "distances"],
-        )
+        query_kwargs: dict[str, Any] = {
+            "query_embeddings": [query_embedding],
+            "n_results": top_k,
+            "include": ["documents", "metadatas", "distances"],
+        }
+
+        if metadata_filter:
+            query_kwargs["where"] = metadata_filter
+
+        return cast(dict[str, Any], self.collection.query(**query_kwargs))
 
     def count(self) -> int:
         """Return the number of records in the collection."""

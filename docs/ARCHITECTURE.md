@@ -9,15 +9,15 @@ The project separates the RAG pipeline into clear layers:
 ```text
 Raw Documents
 ↓
-Document Loading
+Document Loading + Metadata Inference
 ↓
 Heading-Aware Chunking
 ↓
 Embedding Generation
 ↓
-Chroma Vector Store
+Chroma Vector Store with Metadata
 ↓
-Semantic Retrieval
+Filtered Semantic Retrieval
 ↓
 Grounded Prompt Building
 ↓

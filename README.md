@@ -507,14 +507,16 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 1 complete:
+Advanced RAG Phase 2 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
+- Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
-- Chroma vector storage added
-- Semantic retriever added
+- Chroma vector storage with metadata added
+- Semantic retrieval added
+- Metadata-filtered retrieval added
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
@@ -540,3 +542,18 @@ Potential next improvements:
 - add cloud deployment
 - add more realistic banking documents
 - add provider switching for multiple LLMs
+
+## Metadata-Filtered Retrieval
+
+The query runner supports optional metadata filters:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "I forgot my mobile banking password" --product mobile_app
+```
+
+Available sample metadata fields include:
+```text
+product: digital_payments, mobile_app, cards
+channel: qr, mobile_app, card
+document_type: policy
+```

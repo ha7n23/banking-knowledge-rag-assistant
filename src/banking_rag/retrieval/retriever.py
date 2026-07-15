@@ -38,7 +38,12 @@ class KnowledgeRetriever:
         )
         self.default_top_k = default_top_k
 
-    def retrieve(self, query: str, top_k: int | None = None) -> list[RetrievedChunk]:
+    def retrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+        metadata_filter: dict[str, MetadataValue] | None = None,
+    ) -> list[RetrievedChunk]:
         """Retrieve the most relevant chunks for a user query."""
         cleaned_query = query.strip()
 
@@ -55,6 +60,7 @@ class KnowledgeRetriever:
         results = self.vector_store.query(
             query_embedding=query_embedding,
             top_k=top_k or self.default_top_k,
+            metadata_filter=metadata_filter,
         )
 
         return self._parse_results(results)

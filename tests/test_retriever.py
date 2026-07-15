@@ -34,7 +34,12 @@ def build_test_vector_store(tmp_path: Path) -> ChromaVectorStore:
             source="digital_payments.md",
             section="QR Payment Disputes",
             chunk_index=0,
-            metadata={"file_type": "markdown"},
+            metadata={
+                "file_type": "markdown",
+                "product": "digital_payments",
+                "channel": "qr",
+                "document_type": "policy",
+            },
         ),
         DocumentChunk(
             id="chunk-2",
@@ -42,7 +47,12 @@ def build_test_vector_store(tmp_path: Path) -> ChromaVectorStore:
             source="mobile_app_access.md",
             section="Password Recovery",
             chunk_index=0,
-            metadata={"file_type": "markdown"},
+            metadata={
+                "file_type": "markdown",
+                "product": "mobile_app",
+                "channel": "mobile_app",
+                "document_type": "policy",
+            },
         ),
     ]
 
@@ -104,3 +114,21 @@ def test_retriever_fails_when_vector_store_is_empty(tmp_path: Path) -> None:
 
     with pytest.raises(RetrievalError):
         retriever.retrieve("QR payment dispute")
+
+def test_retriever_applies_metadata_filter(tmp_path: Path) -> None:
+    vector_store = build_test_vector_store(tmp_path)
+
+    retriever = KnowledgeRetriever(
+        embedding_model=FakeEmbeddingModel(),
+        vector_store=vector_store,
+        default_top_k=2,
+    )
+
+    results = retriever.retrieve(
+        query="How do I reset my password?",
+        metadata_filter={"product": "digital_payments"},
+    )
+
+    assert len(results) == 1
+    assert results[0].source == "digital_payments.md"
+    assert results[0].metadata["product"] == "digital_payments"

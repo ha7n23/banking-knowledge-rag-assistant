@@ -130,3 +130,19 @@ Reason:
 - catches broken tests
 - checks the Docker image still builds
 - improves portfolio credibility
+
+
+## Metadata Filtering
+
+The project adds document-level metadata during ingestion, including:
+
+- document type
+- product
+- channel
+- authority
+
+This allows retrieval to be restricted to a relevant subset of the knowledge base.
+
+For example, card-related questions can be filtered to card documents, while mobile app access questions can be filtered to mobile app documents.
+
+Metadata filtering is useful in banking because policies and procedures often differ by product, channel, region, customer type, and document authority.
