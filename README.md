@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 5 complete:
+Advanced RAG Phase 6 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -521,6 +521,7 @@ Advanced RAG Phase 5 complete:
 - Simple keyword scoring added
 - Hybrid semantic + keyword retrieval added
 - Lightweight reranking added
+- Conservative query rewriting added
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
@@ -623,3 +624,27 @@ return the best final chunks
 ```
 
 This demonstrates a common advanced RAG pattern where retrieval is split into candidate retrieval and final ranking.
+
+## Query Rewriting
+
+The query runner supports conservative query rewriting for messy user queries.
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_query.py --query "money gone shop says no" --rewrite-query --auto-filter --retrieval-mode hybrid --rerank
+```
+
+The rewriter only changes the query when the intent is obvious.
+Example:
+
+```text
+money gone shop says no
+```
+
+is written as:
+
+```text
+QR payment deducted from customer account but merchant did not receive payment confirmation
+```
+
+If the query is unclear, it is left unchanged.
+This avoids over-rewriting, which can change the user's meaning and hurt retrieval quality.

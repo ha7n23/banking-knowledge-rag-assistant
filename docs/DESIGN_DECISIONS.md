@@ -186,3 +186,17 @@ The reranker combines:
 This demonstrates the two-stage retrieval pattern used in many production RAG systems.
 
 In production, this layer could be replaced with a neural cross-encoder reranker or a managed reranking API.
+
+## Query Rewriting
+
+The project includes conservative query rewriting for messy user queries.
+
+The rewriter only changes the query when the intent is obvious, such as:
+
+- QR payment deducted but merchant did not receive confirmation
+- mobile app password recovery
+- duplicate card charge
+
+If the query is unclear, the original query is preserved.
+
+This reduces the risk of changing the user's meaning while still improving retrieval for informal or incomplete user questions.

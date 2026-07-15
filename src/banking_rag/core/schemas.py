@@ -58,6 +58,14 @@ class SourceReference(BaseModel):
     chunk_index: int
     distance: float
 
+class QueryRewriteResult(BaseModel):
+    """Result of conservative query rewriting."""
+
+    original_query: str
+    rewritten_query: str
+    was_rewritten: bool
+    reason: str
+
 
 class RAGAnswer(BaseModel):
     """Final grounded answer returned by the RAG service."""

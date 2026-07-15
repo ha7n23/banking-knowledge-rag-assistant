@@ -11,6 +11,8 @@ from banking_rag.retrieval.hybrid_retriever import HybridRetriever
 
 from banking_rag.retrieval.reranker import SimpleReranker
 
+from banking_rag.retrieval.query_rewriter import rewrite_query
+
 DEFAULT_QUERY = (
     "What should happen if my QR payment was deducted "
     "but the merchant did not receive it?"
@@ -91,6 +93,12 @@ def parse_args() -> ArgumentParser:
         help="Number of candidate chunks to retrieve before reranking.",
     )
 
+    parser.add_argument(
+        "--rewrite-query",
+        action="store_true",
+        help="Conservatively rewrite messy user queries before retrieval.",
+    )
+
     return parser
 
 def build_metadata_filter(args: object) -> dict[str, MetadataValue] | None:
@@ -122,10 +130,17 @@ def main() -> None:
     parser = parse_args()
     args = parser.parse_args()
 
+    query = args.query
+    rewrite_result = None
+
+    if args.rewrite_query:
+        rewrite_result = rewrite_query(args.query)
+        query = rewrite_result.rewritten_query
+
     metadata_filter = build_metadata_filter(args)
 
     if metadata_filter is None and args.auto_filter:
-        metadata_filter = infer_metadata_filter(args.query)
+        metadata_filter = infer_metadata_filter(query)
 
     if args.retrieval_mode == "hybrid":
         retriever = HybridRetriever()
@@ -138,7 +153,7 @@ def main() -> None:
         retrieval_top_k = max(args.top_k, args.candidate_k)
 
     retrieved_chunks = retriever.retrieve(
-        query=args.query,
+        query=query,
         top_k=retrieval_top_k,
         metadata_filter=metadata_filter,
     )
@@ -146,13 +161,17 @@ def main() -> None:
     if args.rerank:
         reranker = SimpleReranker()
         retrieved_chunks = reranker.rerank(
-            query=args.query,
+            query=query,
             chunks=retrieved_chunks,
             top_k=args.top_k,
         )
 
     print("\n" + "=" * 80)
     print(f"QUERY: {args.query}")
+    if rewrite_result is not None:
+        print(f"REWRITTEN QUERY: {rewrite_result.rewritten_query}")
+        print(f"QUERY WAS REWRITTEN: {rewrite_result.was_rewritten}")
+        print(f"REWRITE REASON: {rewrite_result.reason}")
     print("=" * 80)
 
     if metadata_filter:
