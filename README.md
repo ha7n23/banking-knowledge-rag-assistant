@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 7 complete:
+Advanced RAG Phase 8 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -523,6 +523,7 @@ Advanced RAG Phase 7 complete:
 - Lightweight reranking added
 - Conservative query rewriting added
 - Reusable advanced retrieval pipeline added
+- Advanced retrieval evaluation added
 - Query runner refactored to use retrieval pipeline
 - Grounded prompt builder added
 - Gemini LLM client added
@@ -664,3 +665,19 @@ The pipeline supports:
 - lightweight reranking
 
 This keeps the CLI, API, and RAG service clean because they can all call the same retrieval pipeline instead of duplicating retrieval logic.
+
+## Advanced Retrieval Evaluation
+
+The project includes a separate advanced retrieval evaluation set for messy and exact-match queries.
+
+Run baseline semantic retrieval:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_advanced_eval.py --retrieval-mode semantic
+```
+
+Run the full advanced retrieval pipeline:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_advanced_eval.py --retrieval-mode hybrid --auto-filter --rewrite-query --rerank --candidate-k 6
+```

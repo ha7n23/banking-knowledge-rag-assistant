@@ -117,3 +117,23 @@ The evaluation set also includes:
 - expected answer type
 - expected answer behaviour
 - phrases that must not appear in unsupported answers
+
+## Advanced Retrieval Evaluation
+
+The project includes a separate advanced evaluation set for queries where basic semantic retrieval may be less reliable.
+
+Examples include:
+
+- informal user language
+- exact internal reference codes
+- short incomplete queries
+- duplicate charge wording
+
+The advanced evaluation runner can compare basic semantic retrieval with the full retrieval pipeline:
+
+```text
+query rewriting
+automatic metadata filtering
+hybrid retrieval
+reranking
+```

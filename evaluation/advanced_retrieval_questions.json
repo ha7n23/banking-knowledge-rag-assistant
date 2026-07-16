@@ -1,0 +1,34 @@
+[
+  {
+    "question": "money gone shop says no",
+    "expected_top_source": "digital_payments.md",
+    "expected_top_section": "QR Payment Disputes",
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Retrieve the QR payment dispute section by rewriting the informal query into a payment deducted but merchant not received issue.",
+    "must_not_include": []
+  },
+  {
+    "question": "What does RAAST-P2M-042 mean?",
+    "expected_top_source": "digital_payments.md",
+    "expected_top_section": "QR Payment Disputes",
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Retrieve the QR payment disputes section containing the exact internal sample reference code.",
+    "must_not_include": []
+  },
+  {
+    "question": "app pass forgot",
+    "expected_top_source": "mobile_app_access.md",
+    "expected_top_section": "Password Recovery",
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Rewrite the informal password query and retrieve the mobile app password recovery section.",
+    "must_not_include": []
+  },
+  {
+    "question": "my debit card was charged twice",
+    "expected_top_source": "card_disputes.md",
+    "expected_top_section": "Duplicate Card Charges",
+    "expected_answer_type": "direct_answer",
+    "expected_behavior": "Retrieve the duplicate card charges section.",
+    "must_not_include": []
+  }
+]
