@@ -137,3 +137,17 @@ automatic metadata filtering
 hybrid retrieval
 reranking
 ```
+
+## Answer Evaluation
+
+The project evaluates generated answers separately from retrieval.
+
+This matters because a RAG system can retrieve the correct context but still produce an unsupported answer.
+
+The answer evaluator checks:
+
+- whether sources are present
+- whether forbidden unsupported phrases appear
+- whether no-answer questions include insufficient-information language
+
+This is a lightweight practical evaluation approach. In a production system, it could be extended with human review, LLM-as-judge evaluation, citation verification, and regression dashboards.

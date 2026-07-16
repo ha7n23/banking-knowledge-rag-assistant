@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 9 complete:
+Advanced RAG Phase 10 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -526,6 +526,8 @@ Advanced RAG Phase 9 complete:
 - Advanced retrieval evaluation added
 - RAG answer service connected to advanced retrieval pipeline
 - API supports advanced retrieval options
+- Generated answer evaluation added
+- Basic hallucination safety checks added
 - Query runner refactored to use retrieval pipeline
 - Grounded prompt builder added
 - Gemini LLM client added
@@ -682,3 +684,21 @@ Run the full advanced retrieval pipeline:
 ```bash
 PYTHONPATH=src python src/banking_rag/runners/run_advanced_eval.py --retrieval-mode hybrid --auto-filter --rewrite-query --rerank --candidate-k 6
 ```
+
+## Answer Evaluation
+
+The project includes generated answer evaluation for basic grounding and hallucination safety.
+
+The answer evaluator checks:
+
+- whether the answer includes sources
+- whether unsupported forbidden phrases appear
+- whether no-answer questions correctly admit insufficient information
+
+Run answer evaluation:
+
+```bash
+PYTHONPATH=src python src/banking_rag/runners/run_answer_eval.py --retrieval-mode hybrid --auto-filter --rewrite-query --rerank --candidate-k 6
+```
+
+This is useful because retrieval can succeed while answer generation still fails by adding unsupported claims.

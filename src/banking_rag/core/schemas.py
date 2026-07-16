@@ -132,3 +132,24 @@ class RetrievalPipelineResult(BaseModel):
     retrieval_mode: RetrievalMode
     rerank_enabled: bool
     retrieved_chunks: list[RetrievedResultChunk]
+
+class AnswerEvaluationResult(BaseModel):
+    """Result of evaluating one generated RAG answer."""
+
+    question: str
+    expected_answer_type: ExpectedAnswerType
+    expected_behavior: str
+    answer: str
+    has_sources: bool
+    forbidden_terms_found: list[str]
+    no_answer_language_detected: bool
+    passed: bool
+
+
+class AnswerEvaluationSummary(BaseModel):
+    """Summary of generated answer evaluation results."""
+
+    total: int
+    passed: int
+    failed: int
+    results: list[AnswerEvaluationResult]
