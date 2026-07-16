@@ -40,6 +40,8 @@ class FakeRAGService:
         rewrite_query: bool = False,
         rerank: bool = False,
         candidate_k: int = 8,
+        query_was_rewritten = False,
+        rewrite_reason = None,
     ) -> RAGAnswer:
         chunk = RetrievedChunk(
             text="Customers may raise a QR payment dispute.",
@@ -56,6 +58,10 @@ class FakeRAGService:
             retrieval_query = (
                 "QR payment deducted from customer account but merchant "
                 "did not receive payment confirmation"
+            )
+            query_was_rewritten = True
+            rewrite_reason = (
+                "Detected likely QR payment deducted but merchant not received issue."
             )
 
         final_metadata_filter: dict[str, MetadataValue] | None = metadata_filter
@@ -82,6 +88,8 @@ class FakeRAGService:
             metadata_filter=final_metadata_filter,
             retrieval_mode=retrieval_mode,
             rerank_enabled=rerank,
+            query_was_rewritten=query_was_rewritten,
+            rewrite_reason=rewrite_reason,
         )
 
 
@@ -171,6 +179,8 @@ def test_answer_endpoint_returns_grounded_answer() -> None:
     assert data["metadata_filter"] is None
     assert data["retrieval_mode"] == "semantic"
     assert data["rerank_enabled"] is False
+    assert data["query_was_rewritten"] is False
+    assert data["rewrite_reason"] is None
 
 
 def test_answer_endpoint_accepts_advanced_retrieval_options() -> None:
@@ -200,6 +210,10 @@ def test_answer_endpoint_accepts_advanced_retrieval_options() -> None:
     assert data["rerank_enabled"] is True
     assert len(data["sources"]) == 1
     assert data["sources"][0]["source"] == "digital_payments.md"
+    assert data["query_was_rewritten"] is True
+    assert data["rewrite_reason"] == (
+        "Detected likely QR payment deducted but merchant not received issue."
+    )
 
 
 def test_answer_endpoint_rejects_empty_query() -> None:

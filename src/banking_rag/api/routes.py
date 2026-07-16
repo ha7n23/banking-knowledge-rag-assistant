@@ -55,6 +55,8 @@ def to_answer_response(result: RAGAnswer) -> AnswerResponse:
         metadata_filter=result.metadata_filter,
         retrieval_mode=result.retrieval_mode,
         rerank_enabled=result.rerank_enabled,
+        query_was_rewritten=result.query_was_rewritten,
+        rewrite_reason=result.rewrite_reason,
     )
 
 

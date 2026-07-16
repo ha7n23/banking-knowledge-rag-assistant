@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 10 complete:
+Advanced RAG Phase 11 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -526,6 +526,7 @@ Advanced RAG Phase 10 complete:
 - Advanced retrieval evaluation added
 - RAG answer service connected to advanced retrieval pipeline
 - API supports advanced retrieval options
+- RAG traceability fields added to API responses
 - Generated answer evaluation added
 - Basic hallucination safety checks added
 - Query runner refactored to use retrieval pipeline
@@ -702,3 +703,16 @@ PYTHONPATH=src python src/banking_rag/runners/run_answer_eval.py --retrieval-mod
 ```
 
 This is useful because retrieval can succeed while answer generation still fails by adding unsupported claims.
+
+## RAG Traceability
+
+The API response includes retrieval trace fields such as:
+
+- retrieval query
+- metadata filter
+- retrieval mode
+- rerank status
+- whether the query was rewritten
+- rewrite reason
+
+This makes the RAG system easier to debug because users can see how the original question was transformed before retrieval.

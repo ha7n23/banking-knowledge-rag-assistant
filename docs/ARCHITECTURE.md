@@ -249,3 +249,20 @@ semantic or hybrid candidate retrieval
 optional lightweight reranking
 ↓
 final retrieved chunks
+```
+
+## RAG Traceability
+
+The RAG API returns trace fields that show how retrieval was performed.
+
+These include:
+
+- original question
+- retrieval query
+- metadata filter
+- retrieval mode
+- rerank status
+- query rewrite status
+- rewrite reason
+
+This makes the system easier to debug and explain, especially when retrieval behaviour changes.

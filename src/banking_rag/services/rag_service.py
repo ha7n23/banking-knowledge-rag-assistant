@@ -87,6 +87,13 @@ class BankingRAGService:
             for chunk in pipeline_result.retrieved_chunks
         ]
 
+        query_was_rewritten = False
+        rewrite_reason = None
+
+        if pipeline_result.rewrite_result is not None:
+            query_was_rewritten = pipeline_result.rewrite_result.was_rewritten
+            rewrite_reason = pipeline_result.rewrite_result.reason
+
         return RAGAnswer(
             question=question,
             answer=answer_text,
@@ -96,4 +103,6 @@ class BankingRAGService:
             metadata_filter=pipeline_result.metadata_filter,
             retrieval_mode=pipeline_result.retrieval_mode,
             rerank_enabled=pipeline_result.rerank_enabled,
+            query_was_rewritten=query_was_rewritten,
+            rewrite_reason=rewrite_reason,
         )

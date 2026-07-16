@@ -67,3 +67,5 @@ class AnswerResponse(BaseModel):
     metadata_filter: dict[str, MetadataValue] | None = None
     retrieval_mode: RetrievalMode = "semantic"
     rerank_enabled: bool = False
+    query_was_rewritten: bool = False
+    rewrite_reason: str | None = None

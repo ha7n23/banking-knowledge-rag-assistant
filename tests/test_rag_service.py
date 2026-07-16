@@ -1,5 +1,6 @@
 from banking_rag.core.schemas import (
     MetadataValue,
+    QueryRewriteResult,
     RAGAnswer,
     RetrievalMode,
     RetrievalPipelineResult,
@@ -24,10 +25,18 @@ class FakeRetrievalPipeline:
     ) -> RetrievalPipelineResult:
         retrieval_query = query
 
+        rewrite_result = None
+
         if rewrite_query_enabled:
             retrieval_query = (
                 "QR payment deducted from customer account but merchant "
                 "did not receive payment confirmation"
+            )
+            rewrite_result = QueryRewriteResult(
+                original_query=query,
+                rewritten_query=retrieval_query,
+                was_rewritten=True,
+                reason="Detected likely QR payment deducted but merchant not received issue.",
             )
 
         final_metadata_filter: dict[str, MetadataValue] | None = metadata_filter
@@ -63,7 +72,7 @@ class FakeRetrievalPipeline:
         return RetrievalPipelineResult(
             original_query=query,
             retrieval_query=retrieval_query,
-            rewrite_result=None,
+            rewrite_result=rewrite_result,
             metadata_filter=final_metadata_filter,
             retrieval_mode=retrieval_mode,
             rerank_enabled=rerank,
@@ -110,6 +119,8 @@ def test_rag_service_returns_grounded_answer() -> None:
     assert result.metadata_filter is None
     assert result.retrieval_mode == "semantic"
     assert result.rerank_enabled is False
+    assert result.query_was_rewritten is False
+    assert result.rewrite_reason is None
 
 
 def test_rag_service_supports_advanced_retrieval_options() -> None:
@@ -140,3 +151,7 @@ def test_rag_service_supports_advanced_retrieval_options() -> None:
     assert result.sources[0].section == "QR Payment Disputes"
     assert result.retrieved_chunks[0].source == "digital_payments.md"
     assert "QR payment dispute" in result.answer
+    assert result.query_was_rewritten is True
+    assert result.rewrite_reason == (
+        "Detected likely QR payment deducted but merchant not received issue."
+    )
