@@ -232,3 +232,20 @@ GitHub Actions runs:
 pytest
 docker build
 ```
+
+## Advanced Retrieval Pipeline
+
+The project includes a reusable retrieval pipeline that coordinates:
+
+```text
+user query
+↓
+optional conservative query rewriting
+↓
+optional automatic metadata filter inference
+↓
+semantic or hybrid candidate retrieval
+↓
+optional lightweight reranking
+↓
+final retrieved chunks

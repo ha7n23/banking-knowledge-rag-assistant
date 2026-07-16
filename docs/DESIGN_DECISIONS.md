@@ -200,3 +200,16 @@ The rewriter only changes the query when the intent is obvious, such as:
 If the query is unclear, the original query is preserved.
 
 This reduces the risk of changing the user's meaning while still improving retrieval for informal or incomplete user questions.
+
+## Reusable Retrieval Pipeline
+
+Advanced retrieval logic is implemented in a reusable retrieval pipeline instead of being embedded directly in the query runner.
+
+This makes the project easier to extend because the same retrieval logic can be used by:
+
+- CLI runners
+- FastAPI endpoints
+- the RAG answer service
+- future evaluation scripts
+
+This is closer to production-style application design than keeping retrieval orchestration inside a script.

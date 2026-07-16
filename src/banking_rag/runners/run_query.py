@@ -1,17 +1,10 @@
 from argparse import ArgumentParser
 
 from banking_rag.core.config import TOP_K
-from banking_rag.retrieval.retriever import KnowledgeRetriever
 
 from banking_rag.core.schemas import MetadataValue
 
-from banking_rag.retrieval.filter_router import infer_metadata_filter
-
-from banking_rag.retrieval.hybrid_retriever import HybridRetriever
-
-from banking_rag.retrieval.reranker import SimpleReranker
-
-from banking_rag.retrieval.query_rewriter import rewrite_query
+from banking_rag.retrieval.retrieval_pipeline import RetrievalPipeline
 
 DEFAULT_QUERY = (
     "What should happen if my QR payment was deducted "
@@ -126,59 +119,41 @@ def build_metadata_filter(args: object) -> dict[str, MetadataValue] | None:
 
 
 def main() -> None:
-    """Run retrieval for a user query and print ranked chunks."""
+    """Run a retrieval query and print retrieved chunks."""
     parser = parse_args()
     args = parser.parse_args()
 
-    query = args.query
-    rewrite_result = None
-
-    if args.rewrite_query:
-        rewrite_result = rewrite_query(args.query)
-        query = rewrite_result.rewritten_query
-
     metadata_filter = build_metadata_filter(args)
 
-    if metadata_filter is None and args.auto_filter:
-        metadata_filter = infer_metadata_filter(query)
-
-    if args.retrieval_mode == "hybrid":
-        retriever = HybridRetriever()
-    else:
-        retriever = KnowledgeRetriever()
-
-    retrieval_top_k = args.top_k
-
-    if args.rerank:
-        retrieval_top_k = max(args.top_k, args.candidate_k)
-
-    retrieved_chunks = retriever.retrieve(
-        query=query,
-        top_k=retrieval_top_k,
+    pipeline = RetrievalPipeline()
+    result = pipeline.retrieve(
+        query=args.query,
+        top_k=args.top_k,
+        retrieval_mode=args.retrieval_mode,
         metadata_filter=metadata_filter,
+        auto_filter=args.auto_filter,
+        rewrite_query_enabled=args.rewrite_query,
+        rerank=args.rerank,
+        candidate_k=args.candidate_k,
     )
 
-    if args.rerank:
-        reranker = SimpleReranker()
-        retrieved_chunks = reranker.rerank(
-            query=query,
-            chunks=retrieved_chunks,
-            top_k=args.top_k,
-        )
-
     print("\n" + "=" * 80)
-    print(f"QUERY: {args.query}")
-    if rewrite_result is not None:
-        print(f"REWRITTEN QUERY: {rewrite_result.rewritten_query}")
-        print(f"QUERY WAS REWRITTEN: {rewrite_result.was_rewritten}")
-        print(f"REWRITE REASON: {rewrite_result.reason}")
+    print(f"QUERY: {result.original_query}")
     print("=" * 80)
 
-    if metadata_filter:
-        print(f"METADATA FILTER: {metadata_filter}")
+    if result.rewrite_result is not None:
+        print(f"REWRITTEN QUERY: {result.rewrite_result.rewritten_query}")
+        print(f"QUERY WAS REWRITTEN: {result.rewrite_result.was_rewritten}")
+        print(f"REWRITE REASON: {result.rewrite_result.reason}")
 
-    for rank, chunk in enumerate(retrieved_chunks, start=1):
-        print(f"\nRESULT {rank}")
+    if result.metadata_filter:
+        print(f"METADATA FILTER: {result.metadata_filter}")
+
+    print(f"RETRIEVAL MODE: {result.retrieval_mode}")
+    print(f"RERANK ENABLED: {result.rerank_enabled}")
+
+    for index, chunk in enumerate(result.retrieved_chunks, start=1):
+        print(f"\nRESULT {index}")
         print("-" * 80)
         print(f"Source: {chunk.source}")
         print(f"Section: {chunk.section}")

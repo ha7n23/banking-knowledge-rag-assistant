@@ -6,6 +6,8 @@ MetadataValue = str | int | float | bool
 
 ExpectedAnswerType = Literal["direct_answer", "no_answer"]
 
+RetrievalMode = Literal["semantic", "hybrid"]
+
 
 class RawDocument(BaseModel):
     """A raw document loaded from disk before chunking."""
@@ -49,6 +51,7 @@ class RerankedChunk(HybridRetrievedChunk):
     rerank_keyword_score: float = 0.0
     rerank_section_score: float = 0.0
     rerank_score: float = 0.0
+
 
 class SourceReference(BaseModel):
     """A source used to support a generated answer."""
@@ -112,3 +115,16 @@ class EvaluationSummary(BaseModel):
     top_k_passed: int
     failed_top_k: int
     results: list[RetrievalEvaluationResult]
+
+RetrievedResultChunk = RerankedChunk | HybridRetrievedChunk | RetrievedChunk
+
+class RetrievalPipelineResult(BaseModel):
+    """Result from the reusable retrieval pipeline."""
+
+    original_query: str
+    retrieval_query: str
+    rewrite_result: QueryRewriteResult | None = None
+    metadata_filter: dict[str, MetadataValue] | None = None
+    retrieval_mode: RetrievalMode
+    rerank_enabled: bool
+    retrieved_chunks: list[RetrievedResultChunk]

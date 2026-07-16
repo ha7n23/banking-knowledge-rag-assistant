@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 6 complete:
+Advanced RAG Phase 7 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -522,6 +522,8 @@ Advanced RAG Phase 6 complete:
 - Hybrid semantic + keyword retrieval added
 - Lightweight reranking added
 - Conservative query rewriting added
+- Reusable advanced retrieval pipeline added
+- Query runner refactored to use retrieval pipeline
 - Grounded prompt builder added
 - Gemini LLM client added
 - RAG service added
@@ -648,3 +650,17 @@ QR payment deducted from customer account but merchant did not receive payment c
 
 If the query is unclear, it is left unchanged.
 This avoids over-rewriting, which can change the user's meaning and hurt retrieval quality.
+
+## Retrieval Pipeline
+
+Advanced retrieval logic is handled by a reusable `RetrievalPipeline`.
+
+The pipeline supports:
+
+- conservative query rewriting
+- conservative metadata filter inference
+- semantic retrieval
+- hybrid retrieval
+- lightweight reranking
+
+This keeps the CLI, API, and RAG service clean because they can all call the same retrieval pipeline instead of duplicating retrieval logic.
