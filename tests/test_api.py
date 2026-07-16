@@ -3,7 +3,9 @@ from fastapi.testclient import TestClient
 from banking_rag.api.app import app
 from banking_rag.api.dependencies import get_rag_service, get_retriever
 from banking_rag.core.schemas import (
+    MetadataValue,
     RAGAnswer,
+    RetrievalMode,
     RetrievedChunk,
     SourceReference,
 )
@@ -28,7 +30,17 @@ class FakeRetriever:
 class FakeRAGService:
     """Fake RAG service for API tests."""
 
-    def answer(self, question: str, top_k: int | None = None) -> RAGAnswer:
+    def answer(
+        self,
+        question: str,
+        top_k: int | None = None,
+        retrieval_mode: RetrievalMode = "semantic",
+        metadata_filter: dict[str, MetadataValue] | None = None,
+        auto_filter: bool = False,
+        rewrite_query: bool = False,
+        rerank: bool = False,
+        candidate_k: int = 8,
+    ) -> RAGAnswer:
         chunk = RetrievedChunk(
             text="Customers may raise a QR payment dispute.",
             source="digital_payments.md",
@@ -37,6 +49,19 @@ class FakeRAGService:
             distance=0.42,
             metadata={"file_type": "markdown"},
         )
+
+        retrieval_query = question
+
+        if rewrite_query:
+            retrieval_query = (
+                "QR payment deducted from customer account but merchant "
+                "did not receive payment confirmation"
+            )
+
+        final_metadata_filter: dict[str, MetadataValue] | None = metadata_filter
+
+        if final_metadata_filter is None and auto_filter:
+            final_metadata_filter = {"product": "digital_payments"}
 
         return RAGAnswer(
             question=question,
@@ -53,6 +78,10 @@ class FakeRAGService:
                 )
             ],
             retrieved_chunks=[chunk],
+            retrieval_query=retrieval_query,
+            metadata_filter=final_metadata_filter,
+            retrieval_mode=retrieval_mode,
+            rerank_enabled=rerank,
         )
 
 
@@ -138,6 +167,39 @@ def test_answer_endpoint_returns_grounded_answer() -> None:
     assert len(data["sources"]) == 1
     assert data["sources"][0]["source"] == "digital_payments.md"
     assert len(data["retrieved_chunks"]) == 1
+    assert data["retrieval_query"] == "What is the exact refund timeline?"
+    assert data["metadata_filter"] is None
+    assert data["retrieval_mode"] == "semantic"
+    assert data["rerank_enabled"] is False
+
+
+def test_answer_endpoint_accepts_advanced_retrieval_options() -> None:
+    response = client.post(
+        "/answer",
+        json={
+            "query": "money gone shop says no",
+            "top_k": 3,
+            "retrieval_mode": "hybrid",
+            "auto_filter": True,
+            "rewrite_query": True,
+            "rerank": True,
+            "candidate_k": 6,
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["question"] == "money gone shop says no"
+    assert data["retrieval_query"] == (
+        "QR payment deducted from customer account but merchant "
+        "did not receive payment confirmation"
+    )
+    assert data["metadata_filter"] == {"product": "digital_payments"}
+    assert data["retrieval_mode"] == "hybrid"
+    assert data["rerank_enabled"] is True
+    assert len(data["sources"]) == 1
+    assert data["sources"][0]["source"] == "digital_payments.md"
 
 
 def test_answer_endpoint_rejects_empty_query() -> None:

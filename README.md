@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 8 complete:
+Advanced RAG Phase 9 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -524,10 +524,11 @@ Advanced RAG Phase 8 complete:
 - Conservative query rewriting added
 - Reusable advanced retrieval pipeline added
 - Advanced retrieval evaluation added
+- RAG answer service connected to advanced retrieval pipeline
+- API supports advanced retrieval options
 - Query runner refactored to use retrieval pipeline
 - Grounded prompt builder added
 - Gemini LLM client added
-- RAG service added
 - Improved retrieval evaluation added
 - Top-1 and top-k retrieval evaluation supported
 - No-answer metadata and unsafe phrase checks prepared

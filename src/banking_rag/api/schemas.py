@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from banking_rag.core.schemas import MetadataValue, RetrievalMode
+
 
 class HealthResponse(BaseModel):
     """Basic API health response."""
@@ -47,6 +49,11 @@ class AnswerRequest(BaseModel):
 
     query: str = Field(..., min_length=1)
     top_k: int | None = Field(default=None, ge=1, le=10)
+    retrieval_mode: RetrievalMode = "semantic"
+    auto_filter: bool = False
+    rewrite_query: bool = False
+    rerank: bool = False
+    candidate_k: int = Field(default=8, ge=1, le=20)
 
 
 class AnswerResponse(BaseModel):
@@ -56,3 +63,7 @@ class AnswerResponse(BaseModel):
     answer: str
     sources: list[SourceReferenceAPIResponse]
     retrieved_chunks: list[RetrievedChunkAPIResponse]
+    retrieval_query: str | None = None
+    metadata_filter: dict[str, MetadataValue] | None = None
+    retrieval_mode: RetrievalMode = "semantic"
+    rerank_enabled: bool = False

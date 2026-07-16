@@ -77,6 +77,10 @@ class RAGAnswer(BaseModel):
     answer: str
     sources: list[SourceReference]
     retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)
+    retrieval_query: str | None = None
+    metadata_filter: dict[str, MetadataValue] | None = None
+    retrieval_mode: RetrievalMode = "semantic"
+    rerank_enabled: bool = False
 
 class EvaluationQuestion(BaseModel):
     """A question used to evaluate retrieval quality."""

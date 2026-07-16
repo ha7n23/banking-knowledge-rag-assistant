@@ -51,6 +51,10 @@ def to_answer_response(result: RAGAnswer) -> AnswerResponse:
             to_retrieved_chunk_response(chunk)
             for chunk in result.retrieved_chunks
         ],
+        retrieval_query=result.retrieval_query,
+        metadata_filter=result.metadata_filter,
+        retrieval_mode=result.retrieval_mode,
+        rerank_enabled=result.rerank_enabled,
     )
 
 
@@ -110,6 +114,11 @@ def answer_question(
         result = rag_service.answer(
             question=request.query,
             top_k=request.top_k,
+            retrieval_mode=request.retrieval_mode,
+            auto_filter=request.auto_filter,
+            rewrite_query=request.rewrite_query,
+            rerank=request.rerank,
+            candidate_k=request.candidate_k,
         )
     except RetrievalError as error:
         raise HTTPException(
