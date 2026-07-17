@@ -507,10 +507,12 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 11 complete:
+Advanced RAG Phase 12 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
+- Basic PDF document ingestion added
+- PDF page extraction and page metadata added
 - Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
@@ -534,7 +536,6 @@ Advanced RAG Phase 11 complete:
 - Gemini LLM client added
 - Improved retrieval evaluation added
 - Top-1 and top-k retrieval evaluation supported
-- No-answer metadata and unsafe phrase checks prepared
 - FastAPI backend added
 - Docker support added
 - GitHub Actions CI added
@@ -716,3 +717,29 @@ The API response includes retrieval trace fields such as:
 - rewrite reason
 
 This makes the RAG system easier to debug because users can see how the original question was transformed before retrieval.
+
+## PDF Ingestion
+
+The project supports basic PDF ingestion using `pypdf`.
+
+PDF files are loaded page by page and converted into markdown-like sections:
+
+```text
+# policy.pdf
+
+## Page 1
+Extracted page text...
+
+## Page 2
+Extracted page text...
+```
+
+This allows the existing heading-aware chunker to process PDFs while preserving page-level traceability through metadata such as:
+
+```text
+file_type: pdf
+page_count: 2
+page_number: 1
+```
+
+PDF ingestion is intentionally simple and transparent. Real-world PDFs may require additional handling for tables, scanned images, headers, footers, and multi-column layouts.

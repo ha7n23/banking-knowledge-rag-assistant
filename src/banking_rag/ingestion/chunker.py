@@ -103,6 +103,20 @@ def split_long_text_with_overlap(
 
     return chunks
 
+def extract_page_number(section_name: str) -> int | None:
+    """Extract a page number from section names like 'Page 1'."""
+    normalized = section_name.strip().lower()
+
+    if not normalized.startswith("page "):
+        return None
+
+    page_number_text = normalized.replace("page ", "", 1).strip()
+
+    if not page_number_text.isdigit():
+        return None
+
+    return int(page_number_text)
+
 
 def chunk_documents(
     documents: list[RawDocument],
@@ -126,6 +140,17 @@ def chunk_documents(
             for section_chunk in section_chunks:
                 chunk_id = f"{document.source}::chunk_{document_chunk_index}"
 
+                chunk_metadata = {
+                    **document.metadata,
+                    "section": section_name,
+                    "chunk_index": document_chunk_index,
+                }
+
+                page_number = extract_page_number(section_name)
+
+                if page_number is not None:
+                    chunk_metadata["page_number"] = page_number
+
                 chunks.append(
                     DocumentChunk(
                         id=chunk_id,
@@ -133,11 +158,7 @@ def chunk_documents(
                         source=document.source,
                         section=section_name,
                         chunk_index=document_chunk_index,
-                        metadata={
-                            **document.metadata,
-                            "section": section_name,
-                            "chunk_index": document_chunk_index,
-                        },
+                        metadata=chunk_metadata,
                     )
                 )
 

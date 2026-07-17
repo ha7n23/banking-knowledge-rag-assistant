@@ -81,3 +81,30 @@ def test_split_long_text_with_overlap_rejects_invalid_settings() -> None:
             chunk_size=100,
             chunk_overlap=100,
         )
+
+def test_chunk_documents_adds_page_number_for_pdf_sections() -> None:
+    document = RawDocument(
+        source="digital_payments_policy.pdf",
+        text=(
+            "# digital_payments_policy.pdf\n\n"
+            "## Page 1\n\n"
+            "Customers may raise a QR payment dispute."
+        ),
+        metadata={
+            "file_name": "digital_payments_policy.pdf",
+            "file_type": "pdf",
+            "product": "digital_payments",
+        },
+    )
+
+    chunks = chunk_documents(
+        documents=[document],
+        chunk_size=500,
+        chunk_overlap=50,
+    )
+
+    assert len(chunks) == 1
+    assert chunks[0].source == "digital_payments_policy.pdf"
+    assert chunks[0].section == "Page 1"
+    assert chunks[0].metadata["file_type"] == "pdf"
+    assert chunks[0].metadata["page_number"] == 1

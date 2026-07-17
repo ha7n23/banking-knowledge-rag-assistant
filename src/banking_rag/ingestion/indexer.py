@@ -10,7 +10,7 @@ from banking_rag.core.config import (
 )
 from banking_rag.core.schemas import DocumentChunk
 from banking_rag.ingestion.chunker import chunk_documents
-from banking_rag.ingestion.document_loader import load_markdown_documents
+from banking_rag.ingestion.document_loader import load_documents
 from banking_rag.retrieval.embedding_model import EmbeddingModel
 from banking_rag.retrieval.vector_store import ChromaVectorStore
 
@@ -46,7 +46,7 @@ class KnowledgeBaseIndexer:
 
     def build_chunks(self) -> list[DocumentChunk]:
         """Load raw documents and convert them into chunks."""
-        documents = load_markdown_documents(RAW_DOCS_DIR)
+        documents = load_documents(RAW_DOCS_DIR)
 
         if not documents:
             raise ValueError(f"No markdown documents found in {RAW_DOCS_DIR}")

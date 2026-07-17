@@ -266,3 +266,25 @@ These include:
 - rewrite reason
 
 This makes the system easier to debug and explain, especially when retrieval behaviour changes.
+
+## PDF Ingestion Flow
+
+PDF documents are processed using a simple page-aware ingestion flow:
+
+```text
+PDF file
+↓
+extract text page by page
+↓
+clean extracted text
+↓
+convert each page into a markdown-like section
+↓
+RawDocument
+↓
+heading-aware chunker
+↓
+DocumentChunk with page metadata
+```
+
+This keeps PDF ingestion compatible with the existing markdown chunking pipeline while preserving page-level traceability.
