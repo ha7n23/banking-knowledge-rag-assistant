@@ -10,10 +10,9 @@ from banking_rag.services.evaluation_report_writer import (
 )
 
 
-def test_answer_evaluation_report_writer_creates_json_and_markdown(
-    tmp_path: Path,
-) -> None:
-    summary = AnswerEvaluationSummary(
+def build_sample_summary() -> AnswerEvaluationSummary:
+    """Build a small answer evaluation summary for report tests."""
+    return AnswerEvaluationSummary(
         total=1,
         passed=1,
         failed=0,
@@ -37,17 +36,31 @@ def test_answer_evaluation_report_writer_creates_json_and_markdown(
         ],
     )
 
+
+def test_answer_evaluation_report_writer_creates_latest_reports(
+    tmp_path: Path,
+) -> None:
+    summary = build_sample_summary()
+
     writer = AnswerEvaluationReportWriter(reports_dir=tmp_path)
 
-    json_path, markdown_path = writer.write(
+    (
+        latest_json_path,
+        latest_markdown_path,
+        timestamped_json_path,
+        timestamped_markdown_path,
+    ) = writer.write(
         summary=summary,
-        report_name="test_answer_eval",
+        report_name="test_answer_eval_latest",
+        write_timestamped=False,
     )
 
-    assert json_path.exists()
-    assert markdown_path.exists()
+    assert latest_json_path.exists()
+    assert latest_markdown_path.exists()
+    assert timestamped_json_path is None
+    assert timestamped_markdown_path is None
 
-    json_payload = json.loads(json_path.read_text(encoding="utf-8"))
+    json_payload = json.loads(latest_json_path.read_text(encoding="utf-8"))
 
     assert json_payload["evaluation_type"] == "answer_evaluation"
     assert json_payload["summary"]["total"] == 1
@@ -55,10 +68,44 @@ def test_answer_evaluation_report_writer_creates_json_and_markdown(
     assert json_payload["summary"]["failed"] == 0
     assert json_payload["summary"]["results"][0]["cited_source_numbers"] == [1]
 
-    markdown_text = markdown_path.read_text(encoding="utf-8")
+    markdown_text = latest_markdown_path.read_text(encoding="utf-8")
 
     assert "# Answer Evaluation Report" in markdown_text
     assert "Passed: 1" in markdown_text
     assert "Question 1: PASS" in markdown_text
     assert "Citation validation passed: True" in markdown_text
     assert "Customers may raise a dispute." in markdown_text
+
+
+def test_answer_evaluation_report_writer_creates_timestamped_reports(
+    tmp_path: Path,
+) -> None:
+    summary = build_sample_summary()
+
+    writer = AnswerEvaluationReportWriter(reports_dir=tmp_path)
+
+    (
+        latest_json_path,
+        latest_markdown_path,
+        timestamped_json_path,
+        timestamped_markdown_path,
+    ) = writer.write(
+        summary=summary,
+        report_name="answer_eval_latest",
+        write_timestamped=True,
+    )
+
+    assert latest_json_path.exists()
+    assert latest_markdown_path.exists()
+    assert timestamped_json_path is not None
+    assert timestamped_markdown_path is not None
+    assert timestamped_json_path.exists()
+    assert timestamped_markdown_path.exists()
+
+    assert latest_json_path.name == "answer_eval_latest.json"
+    assert latest_markdown_path.name == "answer_eval_latest.md"
+
+    assert timestamped_json_path.name.startswith("answer_eval_")
+    assert timestamped_json_path.name.endswith(".json")
+    assert timestamped_markdown_path.name.startswith("answer_eval_")
+    assert timestamped_markdown_path.name.endswith(".md")

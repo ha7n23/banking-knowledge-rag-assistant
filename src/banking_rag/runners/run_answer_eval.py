@@ -67,6 +67,12 @@ def parse_args() -> ArgumentParser:
         help="Skip writing JSON and Markdown evaluation reports.",
     )
 
+    parser.add_argument(
+        "--skip-timestamped-report",
+        action="store_true",
+        help="Only write latest reports and skip timestamped history reports.",
+    )
+
     return parser
 
 
@@ -139,16 +145,28 @@ def main() -> None:
 
     if not args.skip_report:
         report_writer = AnswerEvaluationReportWriter()
-        json_path, markdown_path = report_writer.write(
+        (
+            latest_json_path,
+            latest_markdown_path,
+            timestamped_json_path,
+            timestamped_markdown_path,
+        ) = report_writer.write(
             summary=summary,
             report_name=args.report_name,
+            write_timestamped=not args.skip_timestamped_report,
         )
 
         print("\n" + "=" * 80)
         print("REPORTS WRITTEN")
         print("=" * 80)
-        print(f"JSON report: {json_path}")
-        print(f"Markdown report: {markdown_path}")
+        print(f"Latest JSON report: {latest_json_path}")
+        print(f"Latest Markdown report: {latest_markdown_path}")
+
+        if timestamped_json_path is not None:
+            print(f"Timestamped JSON report: {timestamped_json_path}")
+
+        if timestamped_markdown_path is not None:
+            print(f"Timestamped Markdown report: {timestamped_markdown_path}")
 
     if summary.failed > 0:
         raise SystemExit(1)

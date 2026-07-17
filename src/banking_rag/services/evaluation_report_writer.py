@@ -19,27 +19,78 @@ class AnswerEvaluationReportWriter:
         self,
         summary: AnswerEvaluationSummary,
         report_name: str = "answer_eval_latest",
-    ) -> tuple[Path, Path]:
-        """Write JSON and Markdown reports for an answer evaluation summary."""
+        write_timestamped: bool = True,
+    ) -> tuple[Path, Path, Path | None, Path | None]:
+        """
+        Write latest and optional timestamped evaluation reports.
+
+        Returns:
+            latest_json_path, latest_markdown_path,
+            timestamped_json_path, timestamped_markdown_path
+        """
         self.reports_dir.mkdir(parents=True, exist_ok=True)
 
-        json_path = self.reports_dir / f"{report_name}.json"
-        markdown_path = self.reports_dir / f"{report_name}.md"
+        generated_at = datetime.now(timezone.utc)
+        generated_at_utc = generated_at.isoformat()
 
-        generated_at_utc = datetime.now(timezone.utc).isoformat()
+        latest_json_path = self.reports_dir / f"{report_name}.json"
+        latest_markdown_path = self.reports_dir / f"{report_name}.md"
 
         self._write_json_report(
             summary=summary,
-            json_path=json_path,
+            json_path=latest_json_path,
             generated_at_utc=generated_at_utc,
         )
         self._write_markdown_report(
             summary=summary,
-            markdown_path=markdown_path,
+            markdown_path=latest_markdown_path,
             generated_at_utc=generated_at_utc,
         )
 
-        return json_path, markdown_path
+        timestamped_json_path: Path | None = None
+        timestamped_markdown_path: Path | None = None
+
+        if write_timestamped:
+            timestamp = generated_at.strftime("%Y%m%d_%H%M%S")
+            timestamped_report_name = self._build_timestamped_report_name(
+                report_name=report_name,
+                timestamp=timestamp,
+            )
+
+            timestamped_json_path = (
+                self.reports_dir / f"{timestamped_report_name}.json"
+            )
+            timestamped_markdown_path = (
+                self.reports_dir / f"{timestamped_report_name}.md"
+            )
+
+            self._write_json_report(
+                summary=summary,
+                json_path=timestamped_json_path,
+                generated_at_utc=generated_at_utc,
+            )
+            self._write_markdown_report(
+                summary=summary,
+                markdown_path=timestamped_markdown_path,
+                generated_at_utc=generated_at_utc,
+            )
+
+        return (
+            latest_json_path,
+            latest_markdown_path,
+            timestamped_json_path,
+            timestamped_markdown_path,
+        )
+
+    def _build_timestamped_report_name(
+        self,
+        report_name: str,
+        timestamp: str,
+    ) -> str:
+        """Build a timestamped report name from a base report name."""
+        base_name = report_name.removesuffix("_latest")
+
+        return f"{base_name}_{timestamp}"
 
     def _write_json_report(
         self,
