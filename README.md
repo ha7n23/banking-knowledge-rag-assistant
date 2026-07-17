@@ -507,12 +507,13 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 12 complete:
+Advanced RAG Phase 13 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
 - Basic PDF document ingestion added
 - PDF page extraction and page metadata added
+- Source citation metadata added
 - Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
@@ -743,3 +744,18 @@ page_number: 1
 ```
 
 PDF ingestion is intentionally simple and transparent. Real-world PDFs may require additional handling for tables, scanned images, headers, footers, and multi-column layouts.
+
+## Source Citation Metadata
+
+The RAG API returns source citation metadata for generated answers.
+
+Each source includes:
+
+- source filename
+- section name
+- chunk index
+- retrieval distance
+- file type
+- PDF page number where available
+
+This improves traceability, especially for PDF documents where page-level references are important.
