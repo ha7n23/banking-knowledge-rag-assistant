@@ -507,13 +507,14 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 13 complete:
+Advanced RAG Phase 14 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
 - Basic PDF document ingestion added
 - PDF page extraction and page metadata added
 - Source citation metadata added
+- Prompt injection safety rules added
 - Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
@@ -759,3 +760,11 @@ Each source includes:
 - PDF page number where available
 
 This improves traceability, especially for PDF documents where page-level references are important.
+
+## Prompt Injection Safety
+
+The grounded prompt includes a trust boundary between instructions and retrieved context.
+
+Retrieved documents are treated as untrusted reference material, not instructions. The model is explicitly told not to follow commands inside retrieved documents, including commands to ignore rules, reveal prompts, change roles, fabricate details, or use outside knowledge.
+
+This matters because RAG systems can retrieve malicious or poorly controlled text. The assistant should use retrieved chunks as evidence only.
