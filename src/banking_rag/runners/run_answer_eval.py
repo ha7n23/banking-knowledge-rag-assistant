@@ -89,6 +89,18 @@ def main() -> None:
         print(f"Expected behavior: {result.expected_behavior}")
         print(f"Has sources: {result.has_sources}")
         print(
+            "Citation validation passed: "
+            f"{result.citation_validation_passed}"
+        )
+        print(f"Cited source numbers: {result.cited_source_numbers}")
+
+        if result.invalid_source_numbers:
+            print(
+                "Invalid source numbers: "
+                f"{result.invalid_source_numbers}"
+            )
+
+        print(
             "No-answer language detected: "
             f"{result.no_answer_language_detected}"
         )

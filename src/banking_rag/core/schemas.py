@@ -148,6 +148,9 @@ class AnswerEvaluationResult(BaseModel):
     forbidden_terms_found: list[str]
     no_answer_language_detected: bool
     passed: bool
+    cited_source_numbers: list[int] = Field(default_factory=list)
+    invalid_source_numbers: list[int] = Field(default_factory=list)
+    citation_validation_passed: bool = False
 
 
 class AnswerEvaluationSummary(BaseModel):

@@ -11,6 +11,9 @@ from banking_rag.core.schemas import (
     RAGAnswer,
     RetrievalMode,
 )
+from banking_rag.services.citation_validation_service import (
+    CitationValidationService,
+)
 from banking_rag.services.rag_service import BankingRAGService
 
 
@@ -33,15 +36,19 @@ class AnswerServiceProtocol(Protocol):
 
 
 class AnswerEvaluationService:
-    """Evaluates generated RAG answers for basic grounding and safety."""
+    """Evaluates generated RAG answers for grounding, citations, and safety."""
 
     def __init__(
         self,
         answer_service: AnswerServiceProtocol | None = None,
         evaluation_file: Path = EVALUATION_FILE,
+        citation_validation_service: CitationValidationService | None = None,
     ) -> None:
         self.answer_service = answer_service or BankingRAGService()
         self.evaluation_file = evaluation_file
+        self.citation_validation_service = (
+            citation_validation_service or CitationValidationService()
+        )
 
     def load_questions(self) -> list[EvaluationQuestion]:
         """Load answer evaluation questions from JSON."""
@@ -78,6 +85,11 @@ class AnswerEvaluationService:
 
         has_sources = len(rag_answer.sources) > 0
 
+        citation_validation_result = self.citation_validation_service.validate(
+            answer=rag_answer.answer,
+            source_count=len(rag_answer.sources),
+        )
+
         no_answer_language_detected = self._detect_no_answer_language(
             rag_answer.answer
         )
@@ -87,6 +99,7 @@ class AnswerEvaluationService:
             forbidden_terms_found=forbidden_terms_found,
             has_sources=has_sources,
             no_answer_language_detected=no_answer_language_detected,
+            citation_validation_passed=citation_validation_result.passed,
         )
 
         return AnswerEvaluationResult(
@@ -97,6 +110,9 @@ class AnswerEvaluationService:
             has_sources=has_sources,
             forbidden_terms_found=forbidden_terms_found,
             no_answer_language_detected=no_answer_language_detected,
+            cited_source_numbers=citation_validation_result.cited_source_numbers,
+            invalid_source_numbers=citation_validation_result.invalid_source_numbers,
+            citation_validation_passed=citation_validation_result.passed,
             passed=passed,
         )
 
@@ -171,12 +187,16 @@ class AnswerEvaluationService:
         forbidden_terms_found: list[str],
         has_sources: bool,
         no_answer_language_detected: bool,
+        citation_validation_passed: bool,
     ) -> bool:
-        """Decide whether an answer passes basic safety checks."""
+        """Decide whether an answer passes basic grounding and safety checks."""
         if forbidden_terms_found:
             return False
 
         if not has_sources:
+            return False
+
+        if not citation_validation_passed:
             return False
 
         if expected_answer_type == "no_answer":

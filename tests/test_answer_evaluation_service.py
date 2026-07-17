@@ -20,7 +20,8 @@ class FakeSafeAnswerService:
             question=question,
             answer=(
                 "The provided documents do not contain enough information "
-                "to specify an exact refund timeline."
+                "to specify an exact refund timeline.\n\n"
+                "Source: [Source 1] digital_payments.md, QR Payment Disputes."
             ),
             sources=[
                 SourceReference(
@@ -42,7 +43,10 @@ class FakeUnsafeAnswerService:
 
         return RAGAnswer(
             question=question,
-            answer="The refund will happen within 3 days.",
+            answer=(
+                "The refund will happen within 3 days.\n\n"
+                "Source: [Source 1] digital_payments.md, QR Payment Disputes."
+            ),
             sources=[
                 SourceReference(
                     source="digital_payments.md",
@@ -65,6 +69,30 @@ class FakeNoSourceAnswerService:
             question=question,
             answer="Customers may raise a dispute.",
             sources=[],
+            retrieved_chunks=[],
+        )
+
+
+class FakeInvalidCitationAnswerService:
+    """Fake answer service that returns an invalid source citation."""
+
+    def answer(self, *args, **kwargs) -> RAGAnswer:
+        question = kwargs.get("question", "")
+
+        return RAGAnswer(
+            question=question,
+            answer=(
+                "Customers may raise a dispute.\n\n"
+                "Source: [Source 9] digital_payments.md, QR Payment Disputes."
+            ),
+            sources=[
+                SourceReference(
+                    source="digital_payments.md",
+                    section="QR Payment Disputes",
+                    chunk_index=0,
+                    distance=0.42,
+                )
+            ],
             retrieved_chunks=[],
         )
 
@@ -101,6 +129,9 @@ def test_answer_evaluation_passes_safe_no_answer(
     assert summary.failed == 0
     assert summary.results[0].passed is True
     assert summary.results[0].no_answer_language_detected is True
+    assert summary.results[0].citation_validation_passed is True
+    assert summary.results[0].cited_source_numbers == [1]
+    assert summary.results[0].invalid_source_numbers == []
 
 
 def test_answer_evaluation_fails_forbidden_term(
@@ -134,6 +165,9 @@ def test_answer_evaluation_fails_forbidden_term(
     assert summary.passed == 0
     assert summary.failed == 1
     assert summary.results[0].forbidden_terms_found == ["3 days"]
+    assert summary.results[0].citation_validation_passed is True
+    assert summary.results[0].cited_source_numbers == [1]
+    assert summary.results[0].invalid_source_numbers == []
 
 
 def test_answer_evaluation_fails_when_sources_missing(
@@ -167,3 +201,41 @@ def test_answer_evaluation_fails_when_sources_missing(
     assert summary.passed == 0
     assert summary.failed == 1
     assert summary.results[0].has_sources is False
+    assert summary.results[0].citation_validation_passed is False
+    assert summary.results[0].cited_source_numbers == []
+    assert summary.results[0].invalid_source_numbers == []
+
+
+def test_answer_evaluation_fails_invalid_citation(
+    tmp_path: Path,
+) -> None:
+    evaluation_file = tmp_path / "eval.json"
+    evaluation_file.write_text(
+        json.dumps(
+            [
+                {
+                    "question": "Can I raise a dispute?",
+                    "expected_top_source": "digital_payments.md",
+                    "expected_top_section": "QR Payment Disputes",
+                    "expected_behavior": "Mention dispute process.",
+                    "expected_answer_type": "direct_answer",
+                    "must_not_include": [],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    service = AnswerEvaluationService(
+        answer_service=FakeInvalidCitationAnswerService(),
+        evaluation_file=evaluation_file,
+    )
+
+    summary = service.run()
+
+    assert summary.total == 1
+    assert summary.passed == 0
+    assert summary.failed == 1
+    assert summary.results[0].citation_validation_passed is False
+    assert summary.results[0].cited_source_numbers == [9]
+    assert summary.results[0].invalid_source_numbers == [9]
