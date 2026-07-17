@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 17 complete:
+Advanced RAG Phase 18 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -518,6 +518,7 @@ Advanced RAG Phase 17 complete:
 - Citation validation added
 - Citation validation integrated into answer evaluation
 - Evaluation report exporting added
+- Timestamped evaluation regression reports added
 - Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
@@ -797,3 +798,21 @@ Reports are written to:
 ```text
 evaluation/reports/
 ```
+
+The report writer saves both the latest report and timestamped historical reports.
+
+Latest reports are convenient for quickly checking current quality:
+
+```text
+evaluation/reports/answer_eval_latest.json
+evaluation/reports/answer_eval_latest.md
+```
+
+Timestamped reports are useful for regression tracking:
+
+```text
+evaluation/reports/answer_eval_YYYYMMDD_HHMMSS.json
+evaluation/reports/answer_eval_YYYYMMDD_HHMMSS.md
+```
+
+This makes it easier to compare evaluation quality before and after changes to prompts, chunking, retrieval, reranking, or model settings.
