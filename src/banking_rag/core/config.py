@@ -11,6 +11,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 RAW_DOCS_DIR = PROJECT_ROOT / "data" / "raw_docs"
 CHROMA_DIR = PROJECT_ROOT / "data" / "chroma_db"
 EVALUATION_FILE = PROJECT_ROOT / "evaluation" / "evaluation_questions.json"
+EVALUATION_REPORTS_DIR = PROJECT_ROOT / "evaluation" / "reports"
 
 COLLECTION_NAME = "banking_knowledge_base"
 

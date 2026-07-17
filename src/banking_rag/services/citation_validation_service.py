@@ -4,7 +4,7 @@ from banking_rag.core.schemas import CitationValidationResult
 
 
 SOURCE_CITATION_PATTERN = re.compile(
-    r"\[Source\s+(\d+)\]",
+    r"\[(?:Source\s+)?(\d+)\]",
     flags=re.IGNORECASE,
 )
 

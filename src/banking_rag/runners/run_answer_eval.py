@@ -5,6 +5,10 @@ from banking_rag.services.answer_evaluation_service import (
     AnswerEvaluationService,
 )
 
+from banking_rag.services.evaluation_report_writer import (
+    AnswerEvaluationReportWriter,
+)
+
 
 def parse_args() -> ArgumentParser:
     """Create command-line parser for answer evaluation."""
@@ -49,6 +53,18 @@ def parse_args() -> ArgumentParser:
         type=int,
         default=8,
         help="Number of candidate chunks to retrieve before reranking.",
+    )
+
+    parser.add_argument(
+        "--report-name",
+        default="answer_eval_latest",
+        help="Base filename for saved evaluation reports.",
+    )
+
+    parser.add_argument(
+        "--skip-report",
+        action="store_true",
+        help="Skip writing JSON and Markdown evaluation reports.",
     )
 
     return parser
@@ -120,6 +136,19 @@ def main() -> None:
     print(f"Passed: {summary.passed}")
     print(f"Failed: {summary.failed}")
     print(f"Total: {summary.total}")
+
+    if not args.skip_report:
+        report_writer = AnswerEvaluationReportWriter()
+        json_path, markdown_path = report_writer.write(
+            summary=summary,
+            report_name=args.report_name,
+        )
+
+        print("\n" + "=" * 80)
+        print("REPORTS WRITTEN")
+        print("=" * 80)
+        print(f"JSON report: {json_path}")
+        print(f"Markdown report: {markdown_path}")
 
     if summary.failed > 0:
         raise SystemExit(1)

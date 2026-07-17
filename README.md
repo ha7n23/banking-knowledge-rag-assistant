@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 15 complete:
+Advanced RAG Phase 17 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -516,6 +516,8 @@ Advanced RAG Phase 15 complete:
 - Source citation metadata added
 - Prompt injection safety rules added
 - Citation validation added
+- Citation validation integrated into answer evaluation
+- Evaluation report exporting added
 - Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
@@ -777,3 +779,21 @@ The project includes lightweight citation validation for generated RAG answers.
 The validator checks whether citations such as `[Source 1]` refer to retrieved source numbers that actually exist. This helps catch cases where the LLM invents a citation like `[Source 9]` even though only three chunks were retrieved.
 
 This is useful because generated citations should be treated as model output that needs validation, not automatically trusted.
+
+## Evaluation Reports
+
+Answer evaluation can export both JSON and Markdown reports.
+
+The JSON report is machine-readable and useful for regression tracking. The Markdown report is human-readable and useful for GitHub documentation, portfolio review, and interview discussion.
+
+Run answer evaluation and save reports:
+
+```bash
+PYTHONPATH=src python -m banking_rag.runners.run_answer_eval --top-k 3 --retrieval-mode hybrid --auto-filter --rewrite-query --rerank --candidate-k 6
+```
+
+Reports are written to:
+
+```text
+evaluation/reports/
+```

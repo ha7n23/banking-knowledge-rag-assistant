@@ -90,3 +90,18 @@ def test_citation_validation_is_case_insensitive() -> None:
 
     assert result.cited_source_numbers == [1]
     assert result.passed is True
+
+def test_citation_validation_accepts_numeric_bracket_citations() -> None:
+    service = CitationValidationService()
+
+    result = service.validate(
+        answer=(
+            "Customers should use the forgot password option.\n\n"
+            "Source: [1] mobile_app_access.md, Password Recovery."
+        ),
+        source_count=1,
+    )
+
+    assert result.cited_source_numbers == [1]
+    assert result.invalid_source_numbers == []
+    assert result.passed is True

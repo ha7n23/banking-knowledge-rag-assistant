@@ -1,0 +1,71 @@
+{
+  "generated_at_utc": "2026-07-17T10:57:01.600024+00:00",
+  "evaluation_type": "answer_evaluation",
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "results": [
+      {
+        "question": "What should happen if my QR payment was deducted but the merchant did not receive it?",
+        "expected_answer_type": "direct_answer",
+        "expected_behavior": "Explain that the customer may raise a dispute and the bank reviews transaction status, merchant confirmation, settlement records, and channel logs.",
+        "answer": "If your QR payment was deducted from your account but the merchant did not receive the funds, you may raise a dispute. The bank will review the transaction status, merchant confirmation, settlement records, and channel logs. If the payment failed or was not settled successfully, the case may be reversed or escalated following the bank's dispute process.\n\nSource: [Source 1] digital_payments.md, QR Payment Disputes.",
+        "has_sources": true,
+        "forbidden_terms_found": [],
+        "no_answer_language_detected": false,
+        "passed": true,
+        "cited_source_numbers": [
+          1
+        ],
+        "invalid_source_numbers": [],
+        "citation_validation_passed": true
+      },
+      {
+        "question": "What is the exact refund timeline for a failed QR payment?",
+        "expected_answer_type": "no_answer",
+        "expected_behavior": "Say the provided documents do not contain enough information to specify an exact refund timeline.",
+        "answer": "The provided documents do not contain enough information about the exact refund timeline for a failed QR payment. If a QR payment fails or is not settled successfully, the case may be reversed or escalated according to the bank's dispute process.\n\nSource: [Source 1] digital_payments.md, QR Payment Disputes.",
+        "has_sources": true,
+        "forbidden_terms_found": [],
+        "no_answer_language_detected": true,
+        "passed": true,
+        "cited_source_numbers": [
+          1
+        ],
+        "invalid_source_numbers": [],
+        "citation_validation_passed": true
+      },
+      {
+        "question": "I forgot my mobile banking password. How can I get back in?",
+        "expected_answer_type": "direct_answer",
+        "expected_behavior": "Mention the forgot password option and registered mobile number verification.",
+        "answer": "If you forgot your mobile banking password, you should use the \"forgot password\" option within the mobile app. You may be required to verify your registered mobile number before you can set a new password.\n\nSource: [1] mobile_app_access.md, Password Recovery.",
+        "has_sources": true,
+        "forbidden_terms_found": [],
+        "no_answer_language_detected": false,
+        "passed": true,
+        "cited_source_numbers": [
+          1
+        ],
+        "invalid_source_numbers": [],
+        "citation_validation_passed": true
+      },
+      {
+        "question": "My debit card payment was charged twice at the same shop.",
+        "expected_answer_type": "direct_answer",
+        "expected_behavior": "Explain that duplicate card transactions can be reported and reviewed using card transaction logs, merchant records, and settlement information.",
+        "answer": "Customers can report duplicate card transactions where the same merchant payment is charged more than once. These cases are reviewed using card transaction logs, merchant records, and settlement information.\nSource: [1] card_disputes.md, Duplicate Card Charges.",
+        "has_sources": true,
+        "forbidden_terms_found": [],
+        "no_answer_language_detected": false,
+        "passed": true,
+        "cited_source_numbers": [
+          1
+        ],
+        "invalid_source_numbers": [],
+        "citation_validation_passed": true
+      }
+    ]
+  }
+}
