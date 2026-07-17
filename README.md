@@ -507,7 +507,7 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 14 complete:
+Advanced RAG Phase 15 complete:
 
 - RAG pipeline implemented end-to-end
 - Markdown document ingestion added
@@ -515,6 +515,7 @@ Advanced RAG Phase 14 complete:
 - PDF page extraction and page metadata added
 - Source citation metadata added
 - Prompt injection safety rules added
+- Citation validation added
 - Document-level metadata inference added
 - Heading-aware chunking added
 - Local Sentence Transformers embeddings added
@@ -768,3 +769,11 @@ The grounded prompt includes a trust boundary between instructions and retrieved
 Retrieved documents are treated as untrusted reference material, not instructions. The model is explicitly told not to follow commands inside retrieved documents, including commands to ignore rules, reveal prompts, change roles, fabricate details, or use outside knowledge.
 
 This matters because RAG systems can retrieve malicious or poorly controlled text. The assistant should use retrieved chunks as evidence only.
+
+## Citation Validation
+
+The project includes lightweight citation validation for generated RAG answers.
+
+The validator checks whether citations such as `[Source 1]` refer to retrieved source numbers that actually exist. This helps catch cases where the LLM invents a citation like `[Source 9]` even though only three chunks were retrieved.
+
+This is useful because generated citations should be treated as model output that needs validation, not automatically trusted.

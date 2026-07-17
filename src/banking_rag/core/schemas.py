@@ -157,3 +157,12 @@ class AnswerEvaluationSummary(BaseModel):
     passed: int
     failed: int
     results: list[AnswerEvaluationResult]
+
+class CitationValidationResult(BaseModel):
+    """Result of validating citations in a generated answer."""
+
+    cited_source_numbers: list[int]
+    invalid_source_numbers: list[int]
+    source_count: int
+    has_at_least_one_citation: bool
+    passed: bool
