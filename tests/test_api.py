@@ -40,8 +40,6 @@ class FakeRAGService:
         rewrite_query: bool = False,
         rerank: bool = False,
         candidate_k: int = 8,
-        query_was_rewritten = False,
-        rewrite_reason = None,
     ) -> RAGAnswer:
         chunk = RetrievedChunk(
             text="Customers may raise a QR payment dispute.",
@@ -53,6 +51,8 @@ class FakeRAGService:
         )
 
         retrieval_query = question
+        query_was_rewritten = False
+        rewrite_reason = None
 
         if rewrite_query:
             retrieval_query = (
@@ -81,6 +81,8 @@ class FakeRAGService:
                     section="QR Payment Disputes",
                     chunk_index=0,
                     distance=0.42,
+                    file_type="markdown",
+                    page_number=None,
                 )
             ],
             retrieved_chunks=[chunk],
@@ -182,6 +184,9 @@ def test_answer_endpoint_returns_grounded_answer() -> None:
     assert data["query_was_rewritten"] is False
     assert data["rewrite_reason"] is None
 
+    assert data["sources"][0]["file_type"] == "markdown"
+    assert data["sources"][0]["page_number"] is None
+
 
 def test_answer_endpoint_accepts_advanced_retrieval_options() -> None:
     response = client.post(
@@ -214,6 +219,9 @@ def test_answer_endpoint_accepts_advanced_retrieval_options() -> None:
     assert data["rewrite_reason"] == (
         "Detected likely QR payment deducted but merchant not received issue."
     )
+
+    assert data["sources"][0]["file_type"] == "markdown"
+    assert data["sources"][0]["page_number"] is None
 
 
 def test_answer_endpoint_rejects_empty_query() -> None:

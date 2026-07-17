@@ -54,7 +54,10 @@ class FakeRetrievalPipeline:
                 section="QR Payment Disputes",
                 chunk_index=0,
                 distance=0.2,
-                metadata={"product": "digital_payments"},
+                metadata={
+                    "product": "digital_payments",
+                    "file_type": "markdown"
+                    },
             )
         else:
             retrieved_chunk = RetrievedChunk(
@@ -66,7 +69,10 @@ class FakeRetrievalPipeline:
                 section="Password Recovery",
                 chunk_index=0,
                 distance=0.25,
-                metadata={"product": "mobile_app"},
+                metadata={
+                    "product": "mobile_app",
+                    "file_type": "markdown"
+                    },
             )
 
         return RetrievalPipelineResult(
@@ -122,6 +128,9 @@ def test_rag_service_returns_grounded_answer() -> None:
     assert result.query_was_rewritten is False
     assert result.rewrite_reason is None
 
+    assert result.sources[0].file_type == "markdown"
+    assert result.sources[0].page_number is None
+
 
 def test_rag_service_supports_advanced_retrieval_options() -> None:
     service = BankingRAGService(
@@ -155,3 +164,48 @@ def test_rag_service_supports_advanced_retrieval_options() -> None:
     assert result.rewrite_reason == (
         "Detected likely QR payment deducted but merchant not received issue."
     )
+
+    assert result.sources[0].file_type == "markdown"
+    assert result.sources[0].page_number is None
+
+
+class FakePdfRetrievalPipeline:
+    """Fake retrieval pipeline that returns a PDF chunk."""
+
+    def retrieve(self, *args, **kwargs):
+        retrieved_chunk = RetrievedChunk(
+            text="PDF page text about QR disputes.",
+            source="digital_payments_policy.pdf",
+            section="Page 2",
+            chunk_index=1,
+            distance=0.31,
+            metadata={
+                "file_type": "pdf",
+                "page_number": 2,
+            },
+        )
+
+        return RetrievalPipelineResult(
+            original_query="Where is the QR dispute policy?",
+            retrieval_query="Where is the QR dispute policy?",
+            rewrite_result=None,
+            metadata_filter=None,
+            retrieval_mode="semantic",
+            rerank_enabled=False,
+            retrieved_chunks=[retrieved_chunk],
+        )
+
+
+def test_rag_service_adds_pdf_page_citation_metadata() -> None:
+    service = BankingRAGService(
+        retrieval_pipeline=FakePdfRetrievalPipeline(),
+        llm_client=FakeLLMClient(),
+    )
+
+    result = service.answer("Where is the QR dispute policy?")
+
+    assert result.sources[0].source == "digital_payments_policy.pdf"
+    assert result.sources[0].section == "Page 2"
+    assert result.sources[0].file_type == "pdf"
+    assert result.sources[0].page_number == 2
+

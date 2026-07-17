@@ -42,6 +42,8 @@ class SourceReferenceAPIResponse(BaseModel):
     section: str
     chunk_index: int
     distance: float
+    file_type: str | None = None
+    page_number: int | None = None
 
 
 class AnswerRequest(BaseModel):

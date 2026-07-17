@@ -83,9 +83,19 @@ class BankingRAGService:
                 section=chunk.section,
                 chunk_index=chunk.chunk_index,
                 distance=chunk.distance,
+                file_type=(
+                    str(chunk.metadata["file_type"])
+                    if "file_type" in chunk.metadata
+                    else None
+                ),
+                page_number=(
+                    int(chunk.metadata["page_number"])
+                    if "page_number" in chunk.metadata
+                    else None
+                ),
             )
             for chunk in pipeline_result.retrieved_chunks
-        ]
+]
 
         query_was_rewritten = False
         rewrite_reason = None

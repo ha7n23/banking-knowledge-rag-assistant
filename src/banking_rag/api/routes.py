@@ -44,6 +44,8 @@ def to_answer_response(result: RAGAnswer) -> AnswerResponse:
                 section=source.section,
                 chunk_index=source.chunk_index,
                 distance=source.distance,
+                file_type=source.file_type,
+                page_number=source.page_number,
             )
             for source in result.sources
         ],
