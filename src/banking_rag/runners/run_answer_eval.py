@@ -73,8 +73,30 @@ def parse_args() -> ArgumentParser:
         help="Only write latest reports and skip timestamped history reports.",
     )
 
+    parser.add_argument(
+        "--min-pass-rate",
+        type=float,
+        default=1.0,
+        help=(
+            "Minimum required pass rate between 0 and 1. "
+            "Default 1.0 means all evaluation questions must pass."
+        ),
+    )
+
     return parser
 
+def calculate_pass_rate(passed: int, total: int) -> float:
+    """Calculate evaluation pass rate safely."""
+    if total == 0:
+        return 0.0
+
+    return passed / total
+
+
+def validate_min_pass_rate(min_pass_rate: float) -> None:
+    """Validate that the minimum pass rate is between 0 and 1."""
+    if min_pass_rate < 0 or min_pass_rate > 1:
+        raise ValueError("--min-pass-rate must be between 0 and 1.")
 
 def main() -> None:
     """Run answer evaluation and print results."""
@@ -143,6 +165,19 @@ def main() -> None:
     print(f"Failed: {summary.failed}")
     print(f"Total: {summary.total}")
 
+    validate_min_pass_rate(args.min_pass_rate)
+
+    pass_rate = calculate_pass_rate(
+        passed=summary.passed,
+        total=summary.total,
+    )
+
+    quality_gate_passed = pass_rate >= args.min_pass_rate
+
+    print(f"Pass rate: {pass_rate:.2%}")
+    print(f"Minimum required pass rate: {args.min_pass_rate:.2%}")
+    print(f"Quality gate passed: {quality_gate_passed}")
+
     if not args.skip_report:
         report_writer = AnswerEvaluationReportWriter()
         (
@@ -168,8 +203,8 @@ def main() -> None:
         if timestamped_markdown_path is not None:
             print(f"Timestamped Markdown report: {timestamped_markdown_path}")
 
-    if summary.failed > 0:
-        raise SystemExit(1)
+        if not quality_gate_passed:
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":

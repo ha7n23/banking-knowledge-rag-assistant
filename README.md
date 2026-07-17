@@ -507,45 +507,24 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 18 complete:
+Advanced RAG Phase 19 complete:
 
-- RAG pipeline implemented end-to-end
-- Markdown document ingestion added
-- Basic PDF document ingestion added
-- PDF page extraction and page metadata added
-- Source citation metadata added
-- Prompt injection safety rules added
-- Citation validation added
-- Citation validation integrated into answer evaluation
-- Evaluation report exporting added
+- Evaluation quality gates added
 - Timestamped evaluation regression reports added
-- Document-level metadata inference added
-- Heading-aware chunking added
-- Local Sentence Transformers embeddings added
-- Chroma vector storage with metadata added
-- Semantic retrieval added
-- Metadata-filtered retrieval added
-- Conservative automatic metadata filter inference added
-- Simple keyword scoring added
-- Hybrid semantic + keyword retrieval added
-- Lightweight reranking added
-- Conservative query rewriting added
-- Reusable advanced retrieval pipeline added
-- Advanced retrieval evaluation added
+- Evaluation report exporting added
+- Citation validation integrated into answer evaluation
+- Citation validation added
+- Prompt injection safety rules added
+- Source citation metadata added
+- Basic PDF document ingestion added
 - RAG answer service connected to advanced retrieval pipeline
 - API supports advanced retrieval options
 - RAG traceability fields added to API responses
 - Generated answer evaluation added
-- Basic hallucination safety checks added
-- Query runner refactored to use retrieval pipeline
-- Grounded prompt builder added
-- Gemini LLM client added
-- Improved retrieval evaluation added
-- Top-1 and top-k retrieval evaluation supported
+- Hybrid retrieval, reranking, query rewriting, and metadata filtering supported
 - FastAPI backend added
 - Docker support added
 - GitHub Actions CI added
-- Documentation added
 - Unit and API tests passing
 
 ## Future Improvements
@@ -816,3 +795,15 @@ evaluation/reports/answer_eval_YYYYMMDD_HHMMSS.md
 ```
 
 This makes it easier to compare evaluation quality before and after changes to prompts, chunking, retrieval, reranking, or model settings.
+
+## Evaluation Quality Gates
+
+The answer evaluation runner supports a minimum pass-rate quality gate.
+
+Example:
+
+```bash
+PYTHONPATH=src python -m banking_rag.runners.run_answer_eval --top-k 3 --retrieval-mode hybrid --auto-filter --rewrite-query --rerank --candidate-k 6 --min-pass-rate 1.0
+```
+
+A --min-pass-rate of 1.0 requires 100% of evaluation questions to pass. Lower thresholds such as 0.9 can be used as the evaluation set grows.
