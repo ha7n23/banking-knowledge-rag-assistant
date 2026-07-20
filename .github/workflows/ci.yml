@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run Python tests
+    name: Run Python tests and offline RAG evaluation
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,13 @@ jobs:
         run: |
           PYTHONPATH=src pytest
 
+      - name: Run offline RAG evaluation quality gate
+        run: |
+          PYTHONPATH=src python -m banking_rag.runners.run_answer_eval \
+            --mock-answers \
+            --min-pass-rate 1.0 \
+            --skip-timestamped-report
+
   docker-build:
     name: Build Docker image
     runs-on: ubuntu-latest
@@ -42,4 +49,4 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t banking-knowledge-rag-assistant .
+          docker build -t banking-knowledge-rag-assistant .`
