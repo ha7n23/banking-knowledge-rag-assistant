@@ -527,6 +527,11 @@ Advanced RAG Phase 20 complete:
 - Docker support added
 - GitHub Actions CI added
 - Unit and API tests passing
+- Docker build optimised with Docker-specific requirements and build cache
+- Docker runtime verification completed
+- Offline evaluation works inside Docker
+- Indexing works inside Docker
+- FastAPI app runs inside Docker
 
 ## Future Improvements
 
@@ -822,3 +827,29 @@ PYTHONPATH=src python -m banking_rag.runners.run_answer_eval --mock-answers --mi
 ```
 
 Live evaluation should still be used when checking actual model behaviour, but mock evaluation is useful for CI, development, and avoiding API quota issues.
+
+## Docker Runtime Checks
+
+The project can be verified inside Docker using offline evaluation:
+
+```bash
+docker run --rm banking-knowledge-rag-assistant python -m banking_rag.runners.run_answer_eval --mock-answers --min-pass-rate 1.0 --skip-timestamped-report
+```
+
+The knowledge base can also be indexed inside Docker:
+
+```bash
+docker run --rm banking-knowledge-rag-assistant python -m banking_rag.runners.run_index
+```
+
+The API can be started with:
+
+```bash
+docker run --rm --env-file .env -p 8000:8000 banking-knowledge-rag-assistant
+```
+
+Then check;
+
+```bash
+curl http://127.0.0.1:8000/health
+```
