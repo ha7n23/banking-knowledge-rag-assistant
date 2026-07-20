@@ -507,8 +507,9 @@ The assistant should say the documents do not contain enough information to spec
 
 ## Current Status
 
-Advanced RAG Phase 19 complete:
+Advanced RAG Phase 20 complete:
 
+- Offline/mock answer evaluation mode added
 - Evaluation quality gates added
 - Timestamped evaluation regression reports added
 - Evaluation report exporting added
@@ -807,3 +808,17 @@ PYTHONPATH=src python -m banking_rag.runners.run_answer_eval --top-k 3 --retriev
 ```
 
 A --min-pass-rate of 1.0 requires 100% of evaluation questions to pass. Lower thresholds such as 0.9 can be used as the evaluation set grows.
+
+## Offline Evaluation Mode
+
+The answer evaluation runner supports deterministic mock answers.
+
+This allows the evaluation pipeline, citation validation, report writing, and quality gate logic to be tested without calling a live LLM.
+
+Run offline evaluation:
+
+```bash
+PYTHONPATH=src python -m banking_rag.runners.run_answer_eval --mock-answers --min-pass-rate 1.0
+```
+
+Live evaluation should still be used when checking actual model behaviour, but mock evaluation is useful for CI, development, and avoiding API quota issues.

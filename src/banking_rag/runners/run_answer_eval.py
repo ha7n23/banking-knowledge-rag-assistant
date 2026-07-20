@@ -9,6 +9,8 @@ from banking_rag.services.evaluation_report_writer import (
     AnswerEvaluationReportWriter,
 )
 
+from banking_rag.services.mock_answer_service import MockAnswerService
+
 
 def parse_args() -> ArgumentParser:
     """Create command-line parser for answer evaluation."""
@@ -83,6 +85,12 @@ def parse_args() -> ArgumentParser:
         ),
     )
 
+    parser.add_argument(
+        "--mock-answers",
+        action="store_true",
+        help="Use deterministic mock answers instead of calling the live LLM.",
+    )
+
     return parser
 
 def calculate_pass_rate(passed: int, total: int) -> float:
@@ -103,7 +111,11 @@ def main() -> None:
     parser = parse_args()
     args = parser.parse_args()
 
-    service = AnswerEvaluationService()
+    answer_service = MockAnswerService() if args.mock_answers else None
+
+    service = AnswerEvaluationService(
+        answer_service=answer_service,
+    )
 
     summary = service.run(
         top_k=args.top_k,
@@ -122,6 +134,8 @@ def main() -> None:
     print(f"Rewrite query: {args.rewrite_query}")
     print(f"Rerank: {args.rerank}")
     print(f"Candidate-k: {args.candidate_k}")
+
+    print(f"Mock answers: {args.mock_answers}")
 
     for index, result in enumerate(summary.results, start=1):
         status = "PASS" if result.passed else "FAIL"
