@@ -91,6 +91,7 @@ More detail is available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - [API Examples](docs/API_EXAMPLES.md)
 - [Evaluation](docs/EVALUATION.md)
 - [Design Decisions](docs/DESIGN_DECISIONS.md)
+- [Security and Responsible AI](docs/SECURITY_AND_RESPONSIBLE_AI.md)
 
 ---
 
